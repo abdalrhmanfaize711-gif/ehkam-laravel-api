@@ -1,0 +1,298 @@
+Table addition_records {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  num_of_pages decimal(4,2) [not null]
+  from_surah varchar(255) [not null]
+  from_ayah smallint [not null, note: 'unsigned']
+  to_surah varchar(255) [not null]
+  to_ayah smallint [not null, note: 'unsigned']
+  repeated_times smallint [not null, note: 'unsigned']
+  memorization_state enum('حفظ','لم يحفظ') [not null]
+  addition_date date [not null]
+  general_revision tinyint(1) [not null, default: '0']
+  daily_revision tinyint(1) [not null, default: '0']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table admin {
+  id bigint [primary key, not null, note: 'unsigned']
+  username varchar(255) [not null, unique]
+  password varchar(255) [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table attendances {
+  id bigint [primary key, not null, note: 'unsigned']
+  user_id bigint [not null, note: 'unsigned']
+  role enum('student','teacher') [not null]
+  attendance_state enum('present','absent','late') [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table etqan_record {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  num_of_sheets decimal(4,2) [not null]
+  from_surah varchar(255) [not null]
+  from_ayah smallint [not null, note: 'unsigned']
+  to_surah varchar(255) [not null]
+  to_ayah smallint [not null, note: 'unsigned']
+  memorization_state enum('حفظ','لم يحفظ') [not null]
+  addition_date date [not null]
+  general_revision tinyint(1) [not null, default: '0']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table halaqats {
+  id bigint [primary key, not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  insert_date date [not null]
+  max_students int [not null]
+  halaqa_type varchar(255) [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table notifications {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  halaqa_id bigint [not null, note: 'unsigned']
+  title varchar(255) [not null]
+  notification_time time [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table nots {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  text_nots text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table pledges_record {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  pledge_type enum('تعهد ربط عام','تعهد إضافة','تعهد نظام','تعهد غياب') [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table record_exams {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  num_of_questions tinyint [not null, note: 'unsigned']
+  total_mistakes tinyint [not null, note: 'unsigned']
+  total_melodies tinyint [not null, note: 'unsigned']
+  total_hesitiations tinyint [not null, note: 'unsigned']
+  final_percentage decimal(5,2) [not null]
+  exam_type varchar(255) [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table record_plan_years {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  start_date date [not null]
+  min_juz_target tinyint [not null, note: 'unsigned']
+  min_from_surah varchar(255) [not null]
+  min_from_ayah smallint [not null, note: 'unsigned']
+  min_to_surah varchar(255) [not null]
+  min_to_ayah smallint [not null, note: 'unsigned']
+  ideal_juz_target tinyint [not null, note: 'unsigned']
+  ideal_from_surah varchar(255) [not null]
+  ideal_from_ayah smallint [not null, note: 'unsigned']
+  ideal_to_surah varchar(255) [not null]
+  ideal_to_ayah smallint [not null, note: 'unsigned']
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table record_sard_days {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, unique, note: 'unsigned']
+  sard_record_id bigint [not null, note: 'unsigned']
+  num_of_session smallint [not null, note: 'unsigned']
+  sard_day varchar(255) [not null, unique]
+  num_of_remaining_sheets smallint [not null, default: '0', note: 'unsigned']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table record_sard_stages {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  sard_type enum('سرد أول','سرد ثاني') [not null]
+  total_melodies smallint [null, note: 'unsigned']
+  repeat_times smallint [null, note: 'unsigned']
+  total_mistakes smallint [null, note: 'unsigned']
+  hesitation_state enum('مرتفع','متوسط','منخفض') [not null]
+  memorization_state enum('حفظ','لم يحفظ') [not null]
+  sard_duration time [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table region {
+  id bigint [primary key, not null, note: 'unsigned']
+  name varchar(255) [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table sard_records {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  serd_schedule_id bigint [null, note: 'unsigned']
+  total_assigned_juz tinyint [not null, note: 'unsigned']
+  num_of_days smallint [not null, note: 'unsigned']
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table sard_sessions_records {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  record_sard_day_id bigint [not null, note: 'unsigned']
+  total_mistakes tinyint [null, note: 'unsigned']
+  total_melodies tinyint [null, note: 'unsigned']
+  hesitiations_state enum('مرتفع','متوسط','منخفض') [not null]
+  serd_day varchar(255) [not null]
+  from_surah varchar(255) [not null]
+  from_ayah smallint [not null, note: 'unsigned']
+  to_surah varchar(255) [not null]
+  to_ayah smallint [not null, note: 'unsigned']
+  session_state enum('أكمل','لم يكمل') [not null]
+  session_number int [not null]
+  sard_date date [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table scheduled_exams {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  start_date date [not null]
+  end_date date [not null]
+  num_of_juz tinyint [not null, note: 'unsigned']
+  from_surah varchar(255) [not null]
+  from_ayah smallint [not null, note: 'unsigned']
+  to_surah varchar(255) [not null]
+  to_ayah smallint [not null, note: 'unsigned']
+  num_of_questions tinyint [not null, note: 'unsigned']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table scheduled_sard_days {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  serd_schedule_id bigint [not null, note: 'unsigned']
+  sard_day smallint [not null, note: 'unsigned']
+  num_of_sessions tinyint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  from_surah varchar(255) [not null]
+  from_ayah smallint [not null, note: 'unsigned']
+  to_surah varchar(255) [not null]
+  to_ayah smallint [not null, note: 'unsigned']
+  time_assigned time [not null]
+  sard_date date [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table scheduled_sard_stage {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  sard_type enum('سرد أول','سرد ثاني') [not null]
+  sard_date date [not null]
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table serd_schedules {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  teacher_id bigint [not null, note: 'unsigned']
+  total_assigned_juz tinyint [not null, note: 'unsigned']
+  num_of_days smallint [not null, note: 'unsigned']
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table students {
+  id bigint [primary key, not null, note: 'unsigned']
+  user_id bigint [not null, note: 'unsigned']
+  halaqa_id bigint [null, note: 'unsigned']
+  tassheh_halaqa_id bigint [null, note: 'unsigned']
+  stage varchar(255) [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table tassheh_record {
+  id bigint [primary key, not null, note: 'unsigned']
+  student_id bigint [not null, note: 'unsigned']
+  halaqa_id bigint [not null, note: 'unsigned']
+  Is_corrected tinyint(1) [not null, default: '0']
+  insert_date date [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table teachers {
+  id bigint [primary key, not null, note: 'unsigned']
+  user_id bigint [not null, note: 'unsigned']
+  username varchar(255) [not null, unique]
+  password varchar(255) [not null]
+  canSurpriseTestStudents tinyint(1) [not null, default: '0']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Table users {
+  id bigint [primary key, not null, note: 'unsigned']
+  name varchar(255) [not null]
+  barthdate date [not null]
+  region varchar(255) [not null]
+  join_date date [not null]
+  role varchar(255) [not null]
+  remember_token varchar(100) [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+Ref: addition_records.student_id > students.id
+Ref: attendances.user_id > users.id
+Ref: etqan_record.student_id > students.id
+Ref: halaqats.teacher_id > teachers.id
+Ref: notifications.halaqa_id > halaqats.id
+Ref: notifications.student_id > students.id
+Ref: nots.student_id > students.id
+Ref: nots.teacher_id > teachers.id
+Ref: pledges_record.student_id > students.id
+Ref: record_exams.student_id > students.id
+Ref: record_exams.teacher_id > teachers.id
+Ref: record_plan_years.student_id > students.id
+Ref: record_sard_days.sard_record_id > sard_records.id
+Ref: record_sard_days.student_id - students.id
+Ref: record_sard_stages.student_id > students.id
+Ref: sard_records.serd_schedule_id > serd_schedules.id
+Ref: sard_records.student_id > students.id
+Ref: sard_records.teacher_id > teachers.id
+Ref: sard_sessions_records.record_sard_day_id > record_sard_days.id
+Ref: sard_sessions_records.student_id > students.id
+Ref: scheduled_exams.student_id > students.id
+Ref: scheduled_exams.teacher_id > teachers.id
+Ref: scheduled_sard_days.serd_schedule_id > serd_schedules.id
+Ref: scheduled_sard_days.student_id > students.id
+Ref: scheduled_sard_days.teacher_id > teachers.id
+Ref: scheduled_sard_stage.student_id > students.id
+Ref: scheduled_sard_stage.teacher_id > teachers.id
+Ref: serd_schedules.student_id > students.id
+Ref: serd_schedules.teacher_id > teachers.id
+Ref: students.halaqa_id > halaqats.id
+Ref: students.tassheh_halaqa_id > halaqats.id
+Ref: students.user_id > users.id
+Ref: tassheh_record.halaqa_id > halaqats.id
+Ref: tassheh_record.student_id > students.id
+Ref: teachers.user_id > users.id
