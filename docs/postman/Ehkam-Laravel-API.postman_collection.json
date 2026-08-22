@@ -1,0 +1,4117 @@
+{
+    "info": {
+        "name": "Ehkam Laravel API",
+        "description": "Postman collection for ehkam-laravel-api.\n\nBase URL default: http://ehkam-laravel-api.test/api\n\nNotes:\n- Most endpoints are currently public (no auth).\n- Only /profile and /logout declare auth:api.\n- Login currently returns role/info and does not issue a JWT.\n- Some routed actions are missing in controllers (register/profile/logout/teachersReport/etc).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://ehkam-laravel-api.test/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "username",
+            "value": "admin"
+        },
+        {
+            "key": "password",
+            "value": "password"
+        }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "POST /login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "login"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\Api\\AuthController@login\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /loginStudent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/loginStudent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "loginStudent"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\Api\\AuthController@loginStudent\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Student Name\",\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "logout"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\Api\\AuthController@logout\n\nRequires auth:api Bearer token.",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "profile"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\Api\\AuthController@profile\n\nRequires auth:api Bearer token.",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "POST /register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "register"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\Api\\AuthController@register\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"user\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "POST /add_admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_admin",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_admin"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdminController@set_data_admine\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"new_admin\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_admin",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_admin",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_admin"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdminController@delete_admin\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Students",
+            "item": [
+                {
+                    "name": "POST /add_student",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_student",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_student"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@Add_student\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"أحمد\",\n    \"barthdate\": \"1440-01-01\",\n    \"region\": \"الرياض\",\n    \"join_date\": \"1446-01-01\",\n    \"halaqa_id\": 1,\n    \"stage\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /add_student_json",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_student_json",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_student_json"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@Add_students\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[\n    {\n        \"name\": \"أحمد\",\n        \"barthdate\": \"1440-01-01\",\n        \"region\": \"الرياض\",\n        \"join_date\": \"1446-01-01\",\n        \"halaqa_id\": 1\n    }\n]",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_student",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_student",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_student"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@delete_student\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_student",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_student",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_student"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@get_all_student\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "PUT /update_student",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_student",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_student"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@update_student\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"name\": \"أحمد\",\n    \"stage\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Teachers",
+            "item": [
+                {
+                    "name": "POST /add_teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_teacher",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_teacher"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherController@add_teacher\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"معلم\",\n    \"barthdate\": \"1400-01-01\",\n    \"region\": \"الرياض\",\n    \"join_date\": \"1446-01-01\",\n    \"username\": \"teacher1\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /add_teacher_json",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_teacher_json",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_teacher_json"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherController@add_teachers\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[\n    {\n        \"name\": \"معلم\",\n        \"username\": \"teacher1\",\n        \"password\": \"password\"\n    }\n]",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_teacher",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_teacher",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_teacher"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherController@delete_teacher\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_teachers",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_teachers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_teachers"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherController@get_all_teachers\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "PUT /update_teacher",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_teacher",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_teacher"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherController@update_teacher\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"name\": \"معلم\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Halaqat",
+            "item": [
+                {
+                    "name": "PUT /Delete_STD_from_halaqa",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/Delete_STD_from_halaqa",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "Delete_STD_from_halaqa"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentController@Delete_STD_from_halaqa\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /add_halaqat",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_halaqat",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_halaqat"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\HalaqatController@add_halaqat\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"teacher_id\": 1,\n    \"insert_date\": \"1446-01-01\",\n    \"max_students\": 20,\n    \"halaqa_type\": \"حفظ\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_halaqa",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_halaqa",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_halaqa"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\HalaqatController@delete_halaqa\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_halaqat",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_halaqat",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_halaqat"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\HalaqatController@get_all_halaqat\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_halaqa",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_halaqa",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_halaqa"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\HalaqatController@get_special_halaqa\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_halaqa",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_halaqa",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_halaqa"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\HalaqatController@update_halaqa\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"max_students\": 25\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Regions",
+            "item": [
+                {
+                    "name": "POST /add_region",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_region",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_region"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RegionController@add_region\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"الرياض\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_region",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_region",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_region"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RegionController@delete_region\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_region",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_region",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_region"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RegionController@get_all_region\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_region",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_region",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_region"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RegionController@get_special_region\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_region",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_region",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_region"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RegionController@update_region\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"name\": \"جدة\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "item": [
+                {
+                    "name": "POST /get_one_user",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_one_user",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_one_user"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\UserController@get_one_user\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Addition Records",
+            "item": [
+                {
+                    "name": "POST /add_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdditionRecordsController@add_addition_records\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"num_of_pages\": 1.5,\n    \"from_surah\": \"البقرة\",\n    \"from_ayah\": 1,\n    \"to_surah\": \"البقرة\",\n    \"to_ayah\": 10,\n    \"repeated_times\": 1,\n    \"memorization_state\": \"حفظ\",\n    \"addition_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdditionRecordsController@delete\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_record",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdditionRecordsController@get_all_record\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdditionRecordsController@get_special_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_record",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AdditionRecordsController@update_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"num_of_pages\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Etqan",
+            "item": [
+                {
+                    "name": "POST /add_etqan_records",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_etqan_records",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_etqan_records"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\EtqanRecordController@add_etqan_records\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"num_of_sheets\": 1,\n    \"from_surah\": \"البقرة\",\n    \"from_ayah\": 1,\n    \"to_surah\": \"البقرة\",\n    \"to_ayah\": 5,\n    \"memorization_state\": \"حفظ\",\n    \"addition_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_etqan",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_etqan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_etqan"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\EtqanRecordController@delete\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_etqan",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_etqan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_etqan"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\EtqanRecordController@get_all_record\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_etqan",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_etqan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_etqan"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\EtqanRecordController@get_special_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_etqan",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_etqan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_etqan"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\EtqanRecordController@update_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Year Plans",
+            "item": [
+                {
+                    "name": "POST /add_record_plan_years",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_record_plan_years",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_record_plan_years"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@add_record_plan_years\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"min_juz\": 1,\n    \"ideal_juz\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_record_plan_years",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_record_plan_years",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_record_plan_years"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@delete_record_plan_years\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_plan_years",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_plan_years",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_plan_years"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@get_record_plan_years\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "GET /get_record_plan_years",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_record_plan_years",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_record_plan_years"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@get_record_plan_years\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "PUT /update_record_plan_years",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_record_plan_years",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_record_plan_years"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@update_record_plan_years\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Pledges",
+            "item": [
+                {
+                    "name": "POST /add_pledges_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_pledges_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_pledges_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\PledgesRecordController@add_pledges_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"pledge_type\": \"تعهد حضور\",\n    \"insert_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_pledge",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_pledge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_pledge"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\PledgesRecordController@delete_pledge\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_pledges",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_pledges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_pledges"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\PledgesRecordController@get_all_pledges\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_pledge",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_pledge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_pledge"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordPlanYearsController@get_special_pledge\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_pledge",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_pledge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_pledge"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\PledgesRecordController@update_pledge\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "POST /add_notifications",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_notifications"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\NotificationsController@add_notifications\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"halaqa_id\": 1,\n    \"title\": \"تنبيه\",\n    \"notification_time\": \"08:00:00\",\n    \"insert_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_notifications",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_notifications"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\NotificationsController@delete_notifications\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_notifications"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\NotificationsController@get_all_notifications\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_notifications",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_notifications"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\NotificationsController@get_special_notifications\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_notifications",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_notifications"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\NotificationsController@update_notifications\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"title\": \"تنبيه محدث\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tassheh",
+            "item": [
+                {
+                    "name": "POST /add_tassheh_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_tassheh_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_tassheh_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TasshehRecoredController@add_tassheh_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"halaqa_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_tassheh_record",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_tassheh_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_tassheh_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TasshehRecoredController@delete_tassheh_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_special_tassheh_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_tassheh_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_tassheh_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TasshehRecoredController@get_special_tassheh_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_tassheh_record",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_tassheh_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_tassheh_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TasshehRecoredController@update_tassheh_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Serd Schedules",
+            "item": [
+                {
+                    "name": "POST /add_serd_schedule",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_serd_schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_serd_schedule"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SerdSchedulesController@add_serd_schedule\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"total_assigned_juz\": 1,\n    \"num_of_days\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_serd_schedule",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_serd_schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_serd_schedule"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SerdSchedulesController@delete_serd_schedule\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_serd_schedule",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_serd_schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_serd_schedule"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SerdSchedulesController@get_all_serd_schedule\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_serd_schedule",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_serd_schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_serd_schedule"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SerdSchedulesController@get_special_serd_schedule\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_serd_schedule",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_serd_schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_serd_schedule"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SerdSchedulesController@update_serd_schedule\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Sard Schedules",
+            "item": [
+                {
+                    "name": "POST /add_sard",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_sard",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_sard"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardScheduleController@store\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"total_assigned_juz\": 1,\n    \"num_of_days\": 5\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_sard-schedules",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_sard-schedules",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_sard-schedules"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardScheduleController@destroy\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_one_sard-schedules",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_one_sard-schedules",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_one_sard-schedules"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardScheduleController@show\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_sard-schedules",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_sard-schedules",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_sard-schedules"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardScheduleController@index\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /update_sard-schedules",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_sard-schedules",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_sard-schedules"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardScheduleController@update\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Sard Records",
+            "item": [
+                {
+                    "name": "POST /add_sard_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_sard_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_sard_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardRecordsController@add_sard_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"serd_schedule_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /delete_sard_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_sard_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_sard_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardRecordsController@delete_sard_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_sard_records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_sard_records",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_sard_records"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardRecordsController@get_all_sard_records\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_sard_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_sard_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_sard_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardRecordsController@get_sard_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /update_sard_record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_sard_record",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_sard_record"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardRecordsController@update_sard_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Record Sard Days",
+            "item": [
+                {
+                    "name": "POST /add_record-sard-days",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_record-sard-days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_record-sard-days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardDaysController@add_record_sard_day\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"sard_record_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_one_record-sard-days",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_one_record-sard-days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_one_record-sard-days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardDaysController@get_special_record_sard_day\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /record-sard-days",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/record-sard-days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "record-sard-days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardDaysController@get_all_record_sard_days\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "DELETE /record-sard-days",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/record-sard-days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "record-sard-days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardDaysController@delete_record_sard_day\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_record-sard-days",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_record-sard-days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_record-sard-days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardDaysController@update_record_sard_day\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Sard Sessions",
+            "item": [
+                {
+                    "name": "POST /add_sard_session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_sard_session",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_sard_session"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardSessionsRecordController@add_sard_session_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"record_sard_day_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_sard_session",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_sard_session",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_sard_session"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardSessionsRecordController@delete_sard_session_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_sard_sessions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_sard_sessions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_sard_sessions"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardSessionsRecordController@get_all_sard_session_records\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_sard_session",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_sard_session",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_sard_session"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardSessionsRecordController@get_special_sard_session_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_sard_session",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_sard_session",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_sard_session"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\SardSessionsRecordController@update_sard_session_record\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Scheduled Sard Days",
+            "item": [
+                {
+                    "name": "GET /get_all_scheduled_sard_days",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_scheduled_sard_days",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_scheduled_sard_days"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardDaysController@get_all_scheduled_sard_days\n\nPublic endpoint (no auth)."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Scheduled Sard Stage",
+            "item": [
+                {
+                    "name": "POST /add_scheduled_sard_stage",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_scheduled_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_scheduled_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardStageController@add_scheduled_sard_stage\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"sard_date\": \"1446-01-01\",\n    \"insert_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_scheduled_sard_stage",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_scheduled_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_scheduled_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardStageController@delete_scheduled_sard_stage\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_scheduled_sard_stage",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_scheduled_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_scheduled_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardStageController@get_all_scheduled_sard_stage\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_scheduled_sard_stage",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_scheduled_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_scheduled_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardStageController@get_special_scheduled_sard_stage\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_scheduled_sard_stage",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_scheduled_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_scheduled_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledSardStageController@update_scheduled_sard_stage\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Record Sard Stages",
+            "item": [
+                {
+                    "name": "POST /add_record_sard_stages",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_record_sard_stages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_record_sard_stages"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardStagesController@store\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_record_sard_stage",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_record_sard_stage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_record_sard_stage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardStagesController@delete_record_sard_stages\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_record_sard_stages",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_record_sard_stages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_record_sard_stages"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardStagesController@get_all_record_sard_stages\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_record_sard_stages",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_record_sard_stages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_record_sard_stages"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardStagesController@get_special_record_sard_stages\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_record_sard_stages",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_record_sard_stages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_record_sard_stages"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecordSardStagesController@update_record_sard_stages\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Scheduled Exams",
+            "item": [
+                {
+                    "name": "POST /add_scheduled_exam",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_scheduled_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_scheduled_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledExamsController@add_scheduled_exam\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"exam_date\": \"1446-02-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_scheduled_exams",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_scheduled_exams",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_scheduled_exams"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledExamsController@delete_scheduled_exams\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_scheduled_exams",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_scheduled_exams",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_scheduled_exams"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledExamsController@get_all_scheduled_exams\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_scheduled_exams",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_scheduled_exams",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_scheduled_exams"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledExamsController@get_special_scheduled_exams\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "PUT /update_scheduled_exams",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_scheduled_exams",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_scheduled_exams"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ScheduledExamsController@update_scheduled_exams\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Record Exams",
+            "item": [
+                {
+                    "name": "POST /add_record_exam",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_record_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_record_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@add_record_exam\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1,\n    \"teacher_id\": 1,\n    \"num_of_questions\": 10,\n    \"total_mistakes\": 1,\n    \"total_melodies\": 0,\n    \"total_hesitiations\": 0,\n    \"final_percentage\": 90,\n    \"exam_type\": \"عادي\",\n    \"insert_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "DELETE /delete_record_exam",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/delete_record_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete_record_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@delete_record_exam\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_record_exam",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_record_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_record_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@get_all_record_exam\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_special_record_exam",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_record_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_record_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@get_special_record_exam\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /surprise_exam_statistics",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/surprise_exam_statistics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "surprise_exam_statistics"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@surprise_exam_statistics\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "PUT /update_record_exam",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/update_record_exam",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update_record_exam"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\RecoredExamsController@update_record_exam\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Attendance",
+            "item": [
+                {
+                    "name": "POST /add_attendances",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_attendances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_attendances"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@add_attendances\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"attendances\": [\n        {\n            \"user_id\": 1,\n            \"role\": \"student\",\n            \"attendance_state\": \"present\",\n            \"insert_date\": \"1446-01-01\"\n        }\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /add_late_attendance",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/add_late_attendance",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add_late_attendance"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@addLateAttendance\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"user_id\": 1,\n    \"role\": \"student\",\n    \"insert_date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_absent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_absent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_absent"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@getAbsentStudentsByDate\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_all_attendances",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_all_attendances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_all_attendances"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@get_all_attendances\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "GET /get_fridays_date",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_fridays_date",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_fridays_date"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@getLastFourAttendanceDates\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /get_num_attendances",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_num_attendances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_num_attendances"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@get_special_attendances\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"user_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_special_lattendances",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_special_lattendances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_special_lattendances"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@get_special_lattendances\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "GET /get_today_attendance_percentage",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_today_attendance_percentage",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_today_attendance_percentage"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@getTodayAttendancePercentage\n\nPublic endpoint (no auth)."
+                    }
+                },
+                {
+                    "name": "POST /last_Fridays_absent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/last_Fridays_absent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "last_Fridays_absent"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\AttendancesController@getAbsentStudentByDate\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"date\": \"1446-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Profiles",
+            "item": [
+                {
+                    "name": "POST /get_Info_profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_Info_profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_Info_profile"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentProfileController@getInfoPresnal\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_student_record_profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_student_record_profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_student_record_profile"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\StudentRecordProfileController@getStudentRecordProfile\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"student_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /get_teacher_profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/get_teacher_profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get_teacher_profile"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\TeacherProfileController@getInfoPresnal\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"teacher_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "item": [
+                {
+                    "name": "POST /reports_students",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reports_students",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reports_students"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ReportsController@studentsReport\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"from_date\": \"1446-01-01\",\n    \"to_date\": \"1446-12-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "POST /reports_teachers",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reports_teachers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reports_teachers"
+                            ]
+                        },
+                        "description": "App\\Http\\Controllers\\ReportsController@teachersReport\n\nPublic endpoint (no auth).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"from_date\": \"1446-01-01\",\n    \"to_date\": \"1446-12-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
