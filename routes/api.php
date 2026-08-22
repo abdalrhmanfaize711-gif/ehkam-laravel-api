@@ -155,7 +155,7 @@ Route::delete('/delete_serd_schedule', [SerdSchedulesController::class, 'delete_
 
 // Tassheh Record Routes
 Route::post('/add_tassheh_record', [TasshehRecoredController::class, 'add_tassheh_record']);
-Route::post('/get_tassheh_record', [TasshehRecoredController::class, 'get_tassheh_records']);
+Route::post('/get_special_tassheh_record', [TasshehRecoredController::class, 'get_special_tassheh_record']);
 Route::put('/update_tassheh_record', [TasshehRecoredController::class, 'update_tassheh_record']);
 Route::delete('/delete_tassheh_record', [TasshehRecoredController::class, 'delete_tassheh_record']);
 
