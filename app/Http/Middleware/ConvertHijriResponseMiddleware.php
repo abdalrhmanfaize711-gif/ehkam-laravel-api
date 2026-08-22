@@ -12,23 +12,18 @@ class ConvertHijriResponseMiddleware
     {
         $response = $next($request);
 
-
-        if (!$response->headers->contains(
-            'Content-Type',
-            'application/json'
-        )) {
+        // Skip Laravel Brain graph assets and non-JsonResponse payloads.
+        if ($request->is('_laravel-brain*') || ! method_exists($response, 'getData')) {
             return $response;
         }
 
+        if (! $response->headers->contains('Content-Type', 'application/json')) {
+            return $response;
+        }
 
         $data = $response->getData(true);
-
-
         $data = $this->convertDates($data);
-
-
         $response->setData($data);
-
 
         return $response;
     }
