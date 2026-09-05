@@ -1,0 +1,3972 @@
+{
+  "info": {
+    "name": "Ehkam API - Production Readiness Test Collection",
+    "_postman_id": "ehkam-api-production-readiness",
+    "description": "Generated from routes/api.php. Run against staging. POST/PUT/PATCH bodies start as {} so validation can be tested safely; fill valid data per the FormRequest before functional tests. DELETE requests require real IDs and should never be run blindly against production.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "001 POST /login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: public | Controller: AuthController@login | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "002 POST /loginStudent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/loginStudent",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: public | Controller: AuthController@loginStudent | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "003 GET /get_all_scheduled_sard_days",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_scheduled_sard_days",
+        "description": "Ehkam endpoint | Role: admin | Controller: ScheduledSardDaysController@get_all_scheduled_sard_days | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "004 GET /get_record_date",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_record_date",
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@getDatesRecords | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "005 POST /add_student",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_student",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@Add_student | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "006 POST /get_records_by_date",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_records_by_date",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@getStudentRecordsByDate | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "007 POST /add_student_json",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_student_json",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@Add_students | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "008 PUT /update_record_of_STD",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_record_of_STD",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@update_record_of_STD | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "009 PUT /update_student",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_student",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@update_student | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "010 DELETE /delete_student",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_student",
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@delete_student | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "011 PUT /Delete_STD_from_halaqa",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/Delete_STD_from_halaqa",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentController@Delete_STD_from_halaqa | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "012 GET /get_all_teachers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_teachers",
+        "description": "Ehkam endpoint | Role: admin | Controller: TeacherController@get_all_teachers | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "013 POST /add_teacher",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_teacher",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: TeacherController@add_teacher | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "014 POST /add_teacher_json",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_teacher_json",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: TeacherController@add_teachers | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "015 PUT /update_teacher",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_teacher",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: TeacherController@update_teacher | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "016 DELETE /delete_teacher",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_teacher",
+        "description": "Ehkam endpoint | Role: admin | Controller: TeacherController@delete_teacher | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "017 POST /add_record_plan_years",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_record_plan_years",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordPlanYearsController@add_record_plan_years | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "018 GET /get_record_plan_years",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_record_plan_years",
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordPlanYearsController@get_special_record_plan_years | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "019 PUT /update_record_plan_years",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_record_plan_years",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordPlanYearsController@update_record_plan_years | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "020 DELETE /delete_record_plan_years",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_record_plan_years",
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordPlanYearsController@delete_record_plan_years | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "021 GET /get_plan_years",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_plan_years",
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordPlanYearsController@get_record_plan_years | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "022 POST /add_halaqat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_halaqat",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: HalaqatController@add_halaqat | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "023 POST /get_special_halaqa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_halaqa",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: HalaqatController@get_special_halaqa | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "024 PUT /update_halaqa",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_halaqa",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: HalaqatController@update_halaqa | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "025 DELETE /delete_halaqa",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_halaqa",
+        "description": "Ehkam endpoint | Role: admin | Controller: HalaqatController@delete_halaqa | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "026 GET /get_notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_notifications",
+        "description": "Ehkam endpoint | Role: admin | Controller: NotificationsController@get_all_notifications | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "027 GET /get_date_notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_date_notifications",
+        "description": "Ehkam endpoint | Role: admin | Controller: NotificationsController@getLastFourNotificationDates | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "028 POST /get_special_notifications",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_notifications",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: NotificationsController@get_special_notifications | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "029 PUT /update_notifications",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_notifications",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: NotificationsController@update_notifications | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "030 DELETE /delete_notifications",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_notifications",
+        "description": "Ehkam endpoint | Role: admin | Controller: NotificationsController@delete_notifications | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "031 GET /get_all_pledges",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_pledges",
+        "description": "Ehkam endpoint | Role: admin | Controller: PledgesRecordController@get_all_pledges | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "032 POST /add_pledges_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_pledges_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: PledgesRecordController@add_pledges_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "033 POST /get_special_pledge",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_pledge",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: PledgesRecordController@get_special_pledge | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "034 PUT /update_pledge",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_pledge",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: PledgesRecordController@update_pledge | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "035 DELETE /delete_pledge",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_pledge",
+        "description": "Ehkam endpoint | Role: admin | Controller: PledgesRecordController@delete_pledge | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "036 POST /get_absent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_absent",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@getAbsentStudentsByDate | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "037 GET get_fridays_date",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}get_fridays_date",
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@getLastFourAttendanceDates | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "038 POST last_Fridays_absent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}last_Fridays_absent",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@getAbsentStudentByDate | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "039 POST /get_num_attendances",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_num_attendances",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@get_special_attendances | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "040 POST /get_student_record_profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_student_record_profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: StudentRecordProfileController@getStudentRecordProfile | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "041 GET /get_today_attendance_percentage",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_today_attendance_percentage",
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@getTodayAttendancePercentage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "042 POST /add_late_attendance",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_late_attendance",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: AttendancesController@addLateAttendance | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "043 POST /add_record_sard_stages",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_record_sard_stages",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: RecordSardStagesController@store | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "044 POST /add_sard",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_sard",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: SardScheduleController@store | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "045 GET /get_sard-schedules",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_sard-schedules",
+        "description": "Ehkam endpoint | Role: admin | Controller: SardScheduleController@index | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "046 POST /get_one_sard-schedules",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_one_sard-schedules",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: SardScheduleController@show | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "047 POST /update_sard-schedules",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_sard-schedules",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: SardScheduleController@update | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "048 DELETE /delete_sard-schedules",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_sard-schedules",
+        "description": "Ehkam endpoint | Role: admin | Controller: SardScheduleController@destroy | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "049 POST /reports_students",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/reports_students",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: ReportsController@studentsReport | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "050 POST /get_one_user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_one_user",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: UserController@get_one_user | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "051 POST /add_scheduled_exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_scheduled_exam",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: ScheduledExamsController@add_scheduled_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "052 PUT /update_scheduled_exams",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_scheduled_exams",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: ScheduledExamsController@update_scheduled_exams | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "053 DELETE /delete_scheduled_exams",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_scheduled_exams",
+        "description": "Ehkam endpoint | Role: admin | Controller: ScheduledExamsController@delete_scheduled_exams | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "054 POST /add_serd_schedule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_serd_schedule",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: SerdSchedulesController@add_serd_schedule | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "055 PUT /update_serd_schedule",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_serd_schedule",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin | Controller: SerdSchedulesController@update_serd_schedule | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "056 DELETE /delete_serd_schedule",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_serd_schedule",
+        "description": "Ehkam endpoint | Role: admin | Controller: SerdSchedulesController@delete_serd_schedule | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "057 GET /get_all_student",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_student",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: StudentController@get_all_student | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "058 GET /get_all_halaqat",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_halaqat",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: HalaqatController@get_all_halaqat | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "059 GET /get_all_attendances_TCH",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_attendances_TCH",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: AttendancesController@get_all_attendances_TCH | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "060 GET /get_all_attendances_STD",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_attendances_STD",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: AttendancesController@get_all_attendances_STD | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "061 POST /add_attendances",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_attendances",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: AttendancesController@add_attendances | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "062 POST /get_teacher_profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_teacher_profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: TeacherProfileController@getInfoPresnal | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "063 GET /get_all_scheduled_exams",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_scheduled_exams",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledExamsController@get_all_scheduled_exams | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "064 POST /get_special_scheduled_exams",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_scheduled_exams",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledExamsController@get_special_scheduled_exams | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "065 GET /get_all_scheduled_sard_stage",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_scheduled_sard_stage",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledSardStageController@get_all_scheduled_sard_stage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "066 POST /add_scheduled_sard_stage",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_scheduled_sard_stage",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledSardStageController@add_scheduled_sard_stage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "067 POST /get_special_scheduled_sard_stage",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_scheduled_sard_stage",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledSardStageController@get_special_scheduled_sard_stage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "068 PUT /update_scheduled_sard_stage",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_scheduled_sard_stage",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledSardStageController@update_scheduled_sard_stage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "069 DELETE /delete_scheduled_sard_stage",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_scheduled_sard_stage",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: ScheduledSardStageController@delete_scheduled_sard_stage | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "070 GET /get_all_serd_schedule",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_serd_schedule",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SerdSchedulesController@get_all_serd_schedule | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "071 POST /get_special_serd_schedule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_serd_schedule",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SerdSchedulesController@get_special_serd_schedule | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "072 POST /add_sard_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_sard_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SardRecordsController@add_sard_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "073 GET /get_all_sard_records",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_sard_records",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SardRecordsController@get_all_sard_records | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "074 POST /get_sard_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_sard_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SardRecordsController@get_sard_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "075 POST /update_sard_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_sard_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SardRecordsController@update_sard_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "076 POST /delete_sard_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_sard_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: SardRecordsController@delete_sard_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "077 GET /get_all_record_exam",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_record_exam",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecoredExamsController@get_all_record_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "078 POST /add_record_exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_record_exam",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecoredExamsController@add_record_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "079 POST /get_special_record_exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_record_exam",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecoredExamsController@get_special_record_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "080 PUT /update_record_exam",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_record_exam",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecoredExamsController@update_record_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "081 DELETE /delete_record_exam",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_record_exam",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecoredExamsController@delete_record_exam | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "082 POST /add_record-sard-days",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_record-sard-days",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecordSardDaysController@add_record_sard_day | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "083 GET /record-sard-days",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/record-sard-days",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecordSardDaysController@get_all_record_sard_days | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "084 POST /get_one_record-sard-days",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_one_record-sard-days",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecordSardDaysController@get_special_record_sard_day | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "085 PUT /update_record-sard-days",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_record-sard-days",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecordSardDaysController@update_record_sard_day | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "086 DELETE /record-sard-days",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/record-sard-days",
+        "description": "Ehkam endpoint | Role: admin,teacher | Controller: RecordSardDaysController@delete_record_sard_day | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "087 POST /get_Info_profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_Info_profile",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: admin,student | Controller: StudentProfileController@getInfoPresnal | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "088 GET /get_record",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_record",
+        "description": "Ehkam endpoint | Role: teacher | Controller: AdditionRecordsController@get_all_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "089 POST /add_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: AdditionRecordsController@add_addition_records | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "090 DELETE /delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete",
+        "description": "Ehkam endpoint | Role: teacher | Controller: AdditionRecordsController@delete | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "091 GET /get_all_etqan",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_etqan",
+        "description": "Ehkam endpoint | Role: teacher | Controller: EtqanRecordController@get_all_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "092 POST /add_etqan_records",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_etqan_records",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: EtqanRecordController@add_etqan_records | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "093 DELETE /delete_etqan",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_etqan",
+        "description": "Ehkam endpoint | Role: teacher | Controller: EtqanRecordController@delete | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "094 POST /add_tassheh_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_tassheh_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: TasshehRecoredController@add_tassheh_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "095 POST /get_special_tassheh_record",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_tassheh_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: TasshehRecoredController@get_special_tassheh_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "096 PUT /update_tassheh_record",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_tassheh_record",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: TasshehRecoredController@update_tassheh_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "097 DELETE /delete_tassheh_record",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_tassheh_record",
+        "description": "Ehkam endpoint | Role: teacher | Controller: TasshehRecoredController@delete_tassheh_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "098 POST /add_sard_session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/add_sard_session",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: SardSessionsRecordController@add_sard_session_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "099 GET /get_all_sard_sessions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_all_sard_sessions",
+        "description": "Ehkam endpoint | Role: teacher | Controller: SardSessionsRecordController@get_all_sard_session_records | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "100 POST /get_special_sard_session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/get_special_sard_session",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: SardSessionsRecordController@get_special_sard_session_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "101 PUT /update_sard_session",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/update_sard_session",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Ehkam endpoint | Role: teacher | Controller: SardSessionsRecordController@update_sard_session_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "102 DELETE /delete_sard_session",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/delete_sard_session",
+        "description": "Ehkam endpoint | Role: teacher | Controller: SardSessionsRecordController@delete_sard_session_record | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "103 GET /surprise_exam_statistics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{base_url}}/surprise_exam_statistics",
+        "description": "Ehkam endpoint | Role: teacher | Controller: RecoredExamsController@surprise_exam_statistics | Start with staging-safe validation test."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Response is not 5xx', function () { pm.expect(pm.response.code).to.be.below(500); });",
+              "pm.test('JSON response', function () { pm.expect(pm.response.headers.get('Content-Type') || '').to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

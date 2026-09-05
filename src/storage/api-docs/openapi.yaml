@@ -1,0 +1,73 @@
+openapi: 3.0.3
+
+info:
+  title: Ehkam API
+  description: API for Ehkam application
+  version: 1.0.0
+
+servers:
+  - url: http://localhost/api
+
+paths:
+:
+    get:
+      summary: Get students
+
+      security:
+        - sanctum: []
+
+      responses:
+        '200':
+          description: Successful response
+
+        '401':
+          description: Unauthorized
+
+  /attendances:
+    post:
+      summary: Add attendance
+
+      security:
+        - sanctum: []
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              type: object
+
+              required:
+                - student_id
+                - status
+
+              properties:
+                student_id:
+                  type: integer
+                  example: 10
+
+                status:
+                  type: string
+                  example: present
+
+      responses:
+        '201':
+          description: Attendance created
+
+        '401':
+          description: Unauthorized
+
+        '422':
+          description: Validation error
+
+components:
+
+  securitySchemes:
+
+    sanctum:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+security:
+  - sanctum: []

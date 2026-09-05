@@ -1,0 +1,170 @@
+services:
+
+  # ============================================================
+  # Laravel Application - PHP-FPM
+  # ============================================================
+  app:
+    build:
+      context: ./php
+
+    container_name: ehkam-app
+    restart: unless-stopped
+
+    working_dir: /var/www/html
+
+    volumes:
+      - ./src:/var/www/html
+      - vendor_data:/var/www/html/vendor
+
+    environment:
+      # MySQL
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ehkam_db
+      DB_USERNAME: ehkam_pro
+      DB_PASSWORD: ehkam_password
+
+      # Redis
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+    depends_on:
+      - db
+      - redis
+
+    networks:
+      - ehkam_network
+
+    command: php-fpm
+
+
+  # ============================================================
+  # Laravel Scheduler
+  # ============================================================
+  scheduler:
+    build:
+      context: ./php
+
+    container_name: ehkam-scheduler
+    restart: unless-stopped
+
+    working_dir: /var/www/html
+
+    volumes:
+      - ./src:/var/www/html
+      - vendor_data:/var/www/html/vendor
+
+    environment:
+      # MySQL
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ehkam_db
+      DB_USERNAME: ehkam_pro
+      DB_PASSWORD: ehkam_password
+
+      # Redis
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+    depends_on:
+      - db
+      - redis
+
+    networks:
+      - ehkam_network
+
+    command: >
+      sh -c "
+      while true; do
+        php artisan schedule:run --verbose --no-interaction;
+        sleep 60;
+      done
+      "
+
+
+  # ============================================================
+  # MySQL Database
+  # ============================================================
+  db:
+    image: mysql:8.0
+
+    container_name: ehkam-db
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ehkam_db
+      MYSQL_USER: ehkam_pro
+      MYSQL_PASSWORD: ehkam_password
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    networks:
+      - ehkam_network
+
+
+  # ============================================================
+  # Redis
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+
+    container_name: ehkam-redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - ehkam_network
+
+
+  # ============================================================
+  # Nginx
+  # ============================================================
+  nginx:
+    image: nginx:alpine
+
+    container_name: ehkam-nginx
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./src:/var/www/html:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+    depends_on:
+      - app
+
+    networks:
+      - ehkam_network
+
+
+# ==============================================================
+# Volumes
+# ==============================================================
+volumes:
+
+  mysql_data:
+
+  vendor_data:
+
+  redis_data:
+
+
+# ==============================================================
+# Docker Network
+# ==============================================================
+networks:
+
+  ehkam_network:
+    driver: bridge
