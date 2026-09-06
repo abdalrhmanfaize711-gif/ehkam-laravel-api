@@ -1,0 +1,37 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Ehkam API",
+        "description": "API documentation for Ehkam Quran and Islamic Sciences Management System",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/test-swagger": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Test Swagger",
+                "description": "Test endpoint to verify that Swagger documentation generation is working.",
+                "operationId": "f69bfd03c879af98e74d8fd6732e2403",
+                "responses": {
+                    "200": {
+                        "description": "Swagger is working"
+                    }
+                },
+                "servers": [
+                    {
+                        "url": "/",
+                        "description": "Ehkam API Server"
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "System",
+            "description": "System"
+        }
+    ]
+}
