@@ -149,6 +149,27 @@ services:
       - ehkam_network
 
 
+  # ============================================================
+  # Portainer - Docker Management
+  # ============================================================
+  portainer:
+    image: portainer/portainer-ce:latest
+
+    container_name: ehkam-portainer
+
+    restart: unless-stopped
+
+    ports:
+      - "9443:9443"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+    networks:
+      - ehkam_network
+
+
 # ==============================================================
 # Volumes
 # ==============================================================
@@ -159,6 +180,8 @@ volumes:
   vendor_data:
 
   redis_data:
+
+  portainer_data:
 
 
 # ==============================================================
