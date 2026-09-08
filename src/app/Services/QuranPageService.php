@@ -8,137 +8,269 @@ use InvalidArgumentException;
 class QuranPageService
 {
     /**
-     * Calculate the number of Quran pages
-     * between two ayahs inclusively.
+     * عدد صفحات المصحف المدني.
+     */
+    private const TOTAL_PAGES = 604;
+
+    /**
+     * عدد السور في القرآن.
+     */
+    private const TOTAL_SURAHS = 114;
+
+    /**
+     * حساب عدد الصفحات بين آيتين.
      *
-     * Example:
-     * Al-Baqarah 1 -> Al-Baqarah 50
+     * الحساب شامل صفحة البداية وصفحة النهاية.
+     *
+     * مثال:
+     * الصفحة 10 إلى الصفحة 10 = صفحة واحدة
+     * الصفحة 10 إلى الصفحة 15 = 6 صفحات
+     *
+     * @param string|int $fromSurah
+     * @param int        $fromAyah
+     * @param string|int $toSurah
+     * @param int        $toAyah
+     *
+     * @return int
      */
     public function calculatePages(
-        $fromSurah,
-        $fromAyah,
-        $toSurah,
-        $toAyah
+        string|int $fromSurah,
+        int $fromAyah,
+        string|int $toSurah,
+        int $toAyah
     ): int {
-        if (
-            empty($fromSurah) ||
-            empty($fromAyah) ||
-            empty($toSurah) ||
-            empty($toAyah)
-        ) {
-            throw new InvalidArgumentException(
-                'بيانات بداية ونهاية الحفظ مطلوبة لحساب عدد الصفحات'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | تحويل أسماء السور إلى أرقام
-        |--------------------------------------------------------------------------
-        */
+        // ---------------------------------------------------------
+        // 1. تحويل أسماء السور إلى أرقام
+        // ---------------------------------------------------------
 
         $fromSurahNumber = $this->getSurahNumber($fromSurah);
         $toSurahNumber   = $this->getSurahNumber($toSurah);
 
-        /*
-        |--------------------------------------------------------------------------
-        | التحقق من وجود الآية الأولى
-        |--------------------------------------------------------------------------
-        */
+        // ---------------------------------------------------------
+        // 2. التحقق من أرقام الآيات
+        // ---------------------------------------------------------
 
-        $fromRecord = QuranAyahPage::where('surah_number', $fromSurahNumber)
-            ->where('ayah_number', $fromAyah)
-            ->first();
+        $this->validateAyahNumber($fromAyah, 'بداية الحفظ');
+        $this->validateAyahNumber($toAyah, 'نهاية الحفظ');
 
-        if (!$fromRecord) {
-            throw new InvalidArgumentException(
-                "بداية الحفظ غير صحيحة: {$fromSurah} - الآية {$fromAyah}"
-            );
-        }
+        // ---------------------------------------------------------
+        // 3. التحقق من ترتيب البداية والنهاية
+        //
+        // القرآن مرتب:
+        // السورة 1 ثم 2 ثم 3 ...
+        // وداخل كل سورة الآيات 1 ثم 2 ثم 3 ...
+        // ---------------------------------------------------------
 
-        /*
-        |--------------------------------------------------------------------------
-        | التحقق من وجود الآية الأخيرة
-        |--------------------------------------------------------------------------
-        */
-
-        $toRecord = QuranAyahPage::where('surah_number', $toSurahNumber)
-            ->where('ayah_number', $toAyah)
-            ->first();
-
-        if (!$toRecord) {
-            throw new InvalidArgumentException(
-                "نهاية الحفظ غير صحيحة: {$toSurah} - الآية {$toAyah}"
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | التأكد أن البداية قبل النهاية
-        |--------------------------------------------------------------------------
-        */
-
-        $fromPosition = $this->getPosition(
-            $fromSurahNumber,
-            $fromAyah
-        );
-
-        $toPosition = $this->getPosition(
-            $toSurahNumber,
-            $toAyah
-        );
-
-        if ($fromPosition > $toPosition) {
+        if (
+            $fromSurahNumber > $toSurahNumber ||
+            (
+                $fromSurahNumber === $toSurahNumber &&
+                $fromAyah > $toAyah
+            )
+        ) {
             throw new InvalidArgumentException(
                 'بداية الحفظ يجب أن تكون قبل نهاية الحفظ'
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | حساب عدد الصفحات
-        |--------------------------------------------------------------------------
-        |
-        | مثال:
-        |
-        | البداية صفحة 2
-        | النهاية صفحة 8
-        |
-        | عدد الصفحات = 8 - 2 + 1 = 7
-        |
-        */
+        // ---------------------------------------------------------
+        // 4. الحصول على بيانات آية البداية
+        // ---------------------------------------------------------
 
-        return ($toRecord->page_number - $fromRecord->page_number) + 1;
+        $fromRecord = $this->findAyah(
+            $fromSurahNumber,
+            $fromAyah,
+            'بداية الحفظ'
+        );
+
+        // ---------------------------------------------------------
+        // 5. الحصول على بيانات آية النهاية
+        // ---------------------------------------------------------
+
+        $toRecord = $this->findAyah(
+            $toSurahNumber,
+            $toAyah,
+            'نهاية الحفظ'
+        );
+
+        // ---------------------------------------------------------
+        // 6. التحقق من أرقام الصفحات
+        // ---------------------------------------------------------
+
+        $fromPage = (int) $fromRecord->page_number;
+        $toPage   = (int) $toRecord->page_number;
+
+        $this->validatePageNumber(
+            $fromPage,
+            'صفحة بداية الحفظ'
+        );
+
+        $this->validatePageNumber(
+            $toPage,
+            'صفحة نهاية الحفظ'
+        );
+
+        // ---------------------------------------------------------
+        // 7. التأكد من أن نهاية الحفظ ليست في صفحة قبل البداية
+        //
+        // هذا يحميك أيضاً من وجود خطأ في بيانات جدول القرآن.
+        // ---------------------------------------------------------
+
+        if ($fromPage > $toPage) {
+            throw new InvalidArgumentException(
+                'بيانات صفحات القرآن غير صحيحة: صفحة النهاية قبل صفحة البداية'
+            );
+        }
+
+        // ---------------------------------------------------------
+        // 8. حساب عدد الصفحات
+        //
+        // +1 لأن الحساب شامل الطرفين.
+        //
+        // مثال:
+        // من صفحة 10 إلى 15:
+        //
+        // 15 - 10 + 1 = 6
+        // ---------------------------------------------------------
+
+        return ($toPage - $fromPage) + 1;
     }
 
     /**
-     * Get absolute Quran position.
+     * حساب عدد الأوراق بناءً على عدد الصفحات.
      *
-     * This is used only to make sure that the start
-     * ayah comes before the end ayah.
+     * نفترض أن كل ورقة تحتوي على صفحتين.
+     *
+     * مثال:
+     *
+     * 1 صفحة  = 1 ورقة
+     * 2 صفحات = 1 ورقة
+     * 3 صفحات = 2 ورقة
+     * 4 صفحات = 2 ورقة
+     * 5 صفحات = 3 ورقة
      */
-    private function getPosition(
-        int $surahNumber,
-        int $ayahNumber
-    ): int {
-        return (($surahNumber - 1) * 1000) + $ayahNumber;
+    public function calculateSheets(int $numberOfPages): int
+    {
+        if ($numberOfPages < 1) {
+            throw new InvalidArgumentException(
+                'عدد الصفحات يجب أن يكون أكبر من صفر'
+            );
+        }
+
+        return (int) ceil($numberOfPages / 2);
     }
 
     /**
-     * Convert Arabic surah name to surah number.
+     * حساب الصفحات والأوراق معاً.
+     *
+     * يرجع:
+     *
+     * [
+     *     'pages' => 10,
+     *     'sheets' => 5,
+     * ]
      */
-    private function getSurahNumber($surah): int
+    public function calculatePagesAndSheets(
+        string|int $fromSurah,
+        int $fromAyah,
+        string|int $toSurah,
+        int $toAyah
+    ): array {
+        $pages = $this->calculatePages(
+            $fromSurah,
+            $fromAyah,
+            $toSurah,
+            $toAyah
+        );
+
+        $sheets = $this->calculateSheets($pages);
+
+        return [
+            'pages' => $pages,
+            'sheets' => $sheets,
+        ];
+    }
+
+    /**
+     * البحث عن آية داخل جدول quran_ayah_pages.
+     */
+    private function findAyah(
+        int $surahNumber,
+        int $ayahNumber,
+        string $position
+    ): QuranAyahPage {
+        $record = QuranAyahPage::query()
+            ->where('surah_number', $surahNumber)
+            ->where('ayah_number', $ayahNumber)
+            ->first();
+
+        if (!$record) {
+            throw new InvalidArgumentException(
+                "{$position} غير صحيحة: السورة {$surahNumber} - الآية {$ayahNumber}"
+            );
+        }
+
+        return $record;
+    }
+
+    /**
+     * التحقق من رقم الآية.
+     *
+     * أرقام الآيات تبدأ من 1.
+     */
+    private function validateAyahNumber(
+        int $ayahNumber,
+        string $position
+    ): void {
+        if ($ayahNumber < 1) {
+            throw new InvalidArgumentException(
+                "رقم آية {$position} يجب أن يكون أكبر من صفر"
+            );
+        }
+    }
+
+    /**
+     * التحقق من رقم الصفحة.
+     *
+     * المصحف المدني يحتوي على 604 صفحات.
+     */
+    private function validatePageNumber(
+        int $pageNumber,
+        string $position
+    ): void {
+        if (
+            $pageNumber < 1 ||
+            $pageNumber > self::TOTAL_PAGES
+        ) {
+            throw new InvalidArgumentException(
+                "{$position} غير صحيحة: رقم الصفحة {$pageNumber}"
+            );
+        }
+    }
+
+    /**
+     * تحويل اسم السورة أو رقمها إلى رقم السورة.
+     *
+     * يقبل:
+     *
+     * 2
+     * "2"
+     * "البقرة"
+     * " آل عمران "
+     */
+    private function getSurahNumber(string|int $surah): int
     {
-        /*
-        |--------------------------------------------------------------------------
-        | إذا كان Flutter يرسل رقم السورة
-        |--------------------------------------------------------------------------
-        */
+        // ---------------------------------------------------------
+        // إذا تم إرسال رقم السورة
+        // ---------------------------------------------------------
 
         if (is_numeric($surah)) {
             $number = (int) $surah;
 
-            if ($number < 1 || $number > 114) {
+            if (
+                $number < 1 ||
+                $number > self::TOTAL_SURAHS
+            ) {
                 throw new InvalidArgumentException(
                     "رقم السورة غير صحيح: {$surah}"
                 );
@@ -147,11 +279,21 @@ class QuranPageService
             return $number;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | أسماء السور
-        |--------------------------------------------------------------------------
-        */
+        // ---------------------------------------------------------
+        // تنظيف اسم السورة
+        // ---------------------------------------------------------
+
+        $surah = trim($surah);
+
+        if ($surah === '') {
+            throw new InvalidArgumentException(
+                'اسم السورة مطلوب'
+            );
+        }
+
+        // ---------------------------------------------------------
+        // أسماء السور
+        // ---------------------------------------------------------
 
         $surahs = [
             'الفاتحة' => 1,
@@ -279,3 +421,4 @@ class QuranPageService
         return $surahs[$surah];
     }
 }
+

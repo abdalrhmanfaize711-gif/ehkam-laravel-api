@@ -33,10 +33,12 @@ class EtqanRecordController extends Controller
      * to_surah
      * to_ayah
      *
-     * ثم:
+     * الخطوات:
      *
-     * num_of_sheets = ceil(num_of_pages / 2)
+     * 1. calculatePages()
+     * 2. calculateSheets()
      */
+
     public function add_etqan_records(
         AddEtqanRecordRequest $request,
         QuranPageService $quranPageService
@@ -134,14 +136,6 @@ class EtqanRecordController extends Controller
             |--------------------------------------------------------------------------
             | هل الطلب مراجعة عامة فقط؟
             |--------------------------------------------------------------------------
-            |
-            | يحتوي على:
-            |
-            | student_id
-            | general_revision
-            |
-            | فقط بدون بيانات الإتقان.
-            |
             */
 
             $firstRecord = $records[0];
@@ -237,7 +231,7 @@ class EtqanRecordController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | التحقق من الطالب الخاص بالسجل
+                | التحقق من الطالب
                 |--------------------------------------------------------------------------
                 */
 
@@ -250,6 +244,41 @@ class EtqanRecordController extends Controller
                     throw new \Exception(
                         'الطالب غير موجود: ' .
                         $recordStudentId
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | التحقق من Role
+                |--------------------------------------------------------------------------
+                */
+
+                $recordRole = User::where(
+                    'id',
+                    $recordStudent->user_id
+                )->value('role');
+
+
+                if ($recordRole !== 'student') {
+
+                    throw new \Exception(
+                        'المستخدم المرتبط ليس طالباً: ' .
+                        $recordStudentId
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | منع إرسال num_of_sheets من Flutter
+                |--------------------------------------------------------------------------
+                */
+
+                if (array_key_exists('num_of_sheets', $data)) {
+
+                    throw new \InvalidArgumentException(
+                        'num_of_sheets يتم حسابه تلقائياً ولا يمكن إرساله من Flutter'
                     );
                 }
 
@@ -277,9 +306,6 @@ class EtqanRecordController extends Controller
                 |--------------------------------------------------------------------------
                 | التحقق من بيانات القرآن
                 |--------------------------------------------------------------------------
-                |
-                | لا يمكن حساب الأوراق بدون الموضع الكامل.
-                |
                 */
 
                 if (
@@ -289,7 +315,7 @@ class EtqanRecordController extends Controller
                     $toAyah === null
                 ) {
 
-                    throw new \Exception(
+                    throw new \InvalidArgumentException(
                         'from_surah و from_ayah و to_surah و to_ayah مطلوبة لحساب عدد الأوراق'
                     );
                 }
@@ -299,10 +325,6 @@ class EtqanRecordController extends Controller
                 |--------------------------------------------------------------------------
                 | حساب عدد الصفحات
                 |--------------------------------------------------------------------------
-                |
-                | QuranPageService يحسب عدد الصفحات
-                | من موضع البداية إلى موضع النهاية.
-                |
                 */
 
                 $numOfPages =
@@ -316,23 +338,19 @@ class EtqanRecordController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | تحويل الصفحات إلى أوراق
+                | حساب عدد الأوراق
                 |--------------------------------------------------------------------------
                 |
-                | الورقة = صفحتين.
+                | يتم الحساب بواسطة Service.
                 |
-                | مثال:
-                |
-                | 1 صفحة  => 1 ورقة
-                | 2 صفحات => 1 ورقة
-                | 3 صفحات => 2 ورقة
-                | 4 صفحات => 2 ورقة
-                | 5 صفحات => 3 ورقة
+                | لا نستخدم ceil() داخل Controller.
                 |
                 */
 
                 $numOfSheets =
-                    (int) ceil($numOfPages / 2);
+                    $quranPageService->calculateSheets(
+                        $numOfPages
+                    );
 
 
                 /*
@@ -359,9 +377,9 @@ class EtqanRecordController extends Controller
                         $toAyah,
 
                     /*
-                    |--------------------------------------------------------------
+                    |--------------------------------------------------------------------------
                     | محسوبة تلقائياً
-                    |--------------------------------------------------------------
+                    |--------------------------------------------------------------------------
                     */
 
                     'num_of_sheets' =>
@@ -627,33 +645,38 @@ class EtqanRecordController extends Controller
         |--------------------------------------------------------------------------
         | تحديد المرحلة التالية
         |--------------------------------------------------------------------------
+        |
+        | مهم:
+        | استخدمنا نفس أسماء المراحل الموجودة في
+        | update_record_of_STD()
+        |
         */
 
-        switch ($student->stage) {
+        switch (trim($student->stage)) {
 
-            case 'اتقان اول':
+            case 'إتقان أول':
 
                 $title = 'إكمال إتقان أول';
 
                 $student->update([
-                    'stage' => 'اتقان ثاني'
+                    'stage' => 'إتقان ثاني'
                 ]);
 
                 break;
 
 
-            case 'اتقان ثاني':
+            case 'إتقان ثاني':
 
                 $title = 'إكمال إتقان ثاني';
 
                 $student->update([
-                    'stage' => 'اتقان ثالث'
+                    'stage' => 'إتقان ثالث'
                 ]);
 
                 break;
 
 
-            case 'اتقان ثالث':
+            case 'إتقان ثالث':
 
                 $title = 'إكمال إتقان ثالث';
 
@@ -689,6 +712,7 @@ class EtqanRecordController extends Controller
         $request,
         $title
     ) {
+
         /*
         |--------------------------------------------------------------------------
         | منع تكرار نفس الإشعار
@@ -823,9 +847,16 @@ class EtqanRecordController extends Controller
     |--------------------------------------------------------------------------
     |
     | مهم:
-    | num_of_sheets لا يأتي من Flutter.
     |
-    | يتم إعادة حسابه عند كل Update.
+    | Flutter لا يرسل num_of_sheets.
+    |
+    | إذا تغيرت بيانات القرآن يتم:
+    |
+    | 1. calculatePages()
+    | 2. calculateSheets()
+    |
+    | أما إذا تم تعديل حقل آخر فقط،
+    | لا نعيد الحساب بدون داعٍ.
     |
     */
 
@@ -916,42 +947,18 @@ class EtqanRecordController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | بيانات القرآن الجديدة
+            | منع تعديل num_of_sheets يدوياً
             |--------------------------------------------------------------------------
             */
 
-            $fromSurah =
-                $request->from_surah;
-
-            $fromAyah =
-                $request->from_ayah;
-
-            $toSurah =
-                $request->to_surah;
-
-            $toAyah =
-                $request->to_ayah;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | التحقق من البيانات
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                $fromSurah === null ||
-                $fromAyah === null ||
-                $toSurah === null ||
-                $toAyah === null
-            ) {
+            if ($request->has('num_of_sheets')) {
 
                 DB::rollBack();
 
                 return response()->json([
 
                     'message' =>
-                        'from_surah و from_ayah و to_surah و to_ayah مطلوبة لحساب عدد الأوراق'
+                        'num_of_sheets يتم حسابه تلقائياً ولا يمكن تعديله يدوياً'
 
                 ], 422);
             }
@@ -959,71 +966,206 @@ class EtqanRecordController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | إعادة حساب الصفحات
+            | منع إرسال num_of_pages
             |--------------------------------------------------------------------------
+            |
+            | جدول الإتقان لا يحتاج num_of_pages.
+            | نستخدمه داخلياً فقط للحساب.
+            |
             */
 
-            $numOfPages =
-                $quranPageService->calculatePages(
-                    $fromSurah,
-                    $fromAyah,
-                    $toSurah,
-                    $toAyah
-                );
+            if ($request->has('num_of_pages')) {
+
+                DB::rollBack();
+
+                return response()->json([
+
+                    'message' =>
+                        'num_of_pages غير مسموح به في سجل الإتقان'
+
+                ], 422);
+            }
 
 
             /*
             |--------------------------------------------------------------------------
-            | تحويل الصفحات إلى أوراق
+            | Prepare Update Data
             |--------------------------------------------------------------------------
             */
 
-            $numOfSheets =
-                (int) ceil($numOfPages / 2);
+            $updateData = [];
 
 
             /*
             |--------------------------------------------------------------------------
-            | تحديث السجل
+            | Common Fields
             |--------------------------------------------------------------------------
             */
 
-            $record->update([
+            $commonFields = [
+                'student_id',
+                'from_surah',
+                'from_ayah',
+                'to_surah',
+                'to_ayah',
+                'memorization_state',
+                'general_revision',
+                'addition_date',
+            ];
 
-                'student_id' =>
-                    $request->student_id,
 
-                'from_surah' =>
-                    $fromSurah,
+            foreach ($commonFields as $field) {
 
-                'from_ayah' =>
-                    $fromAyah,
+                if ($request->has($field)) {
 
-                'to_surah' =>
-                    $toSurah,
+                    $updateData[$field] =
+                        $request->input($field);
+                }
+            }
 
-                'to_ayah' =>
-                    $toAyah,
+
+            /*
+            |--------------------------------------------------------------------------
+            | هل تغيرت بيانات القرآن؟
+            |--------------------------------------------------------------------------
+            */
+
+            $quranFieldChanged =
+                $request->has('from_surah') ||
+                $request->has('from_ayah') ||
+                $request->has('to_surah') ||
+                $request->has('to_ayah');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | إعادة حساب عدد الأوراق
+            |--------------------------------------------------------------------------
+            */
+
+            if ($quranFieldChanged) {
 
                 /*
-                |--------------------------------------------------------------
-                | محسوبة تلقائياً
-                |--------------------------------------------------------------
+                |--------------------------------------------------------------------------
+                | استخدام القيمة الجديدة إذا أرسلها Flutter
+                | وإلا استخدام القيمة القديمة من Database
+                |--------------------------------------------------------------------------
                 */
 
-                'num_of_sheets' =>
-                    $numOfSheets,
+                $fromSurah =
+                    $request->has('from_surah')
+                        ? $request->input('from_surah')
+                        : $record->from_surah;
 
-                'memorization_state' =>
-                    $request->memorization_state,
 
-                'general_revision' =>
-                    $request->general_revision,
+                $fromAyah =
+                    $request->has('from_ayah')
+                        ? $request->input('from_ayah')
+                        : $record->from_ayah;
 
-                'addition_date' =>
-                    $request->addition_date,
 
-            ]);
+                $toSurah =
+                    $request->has('to_surah')
+                        ? $request->input('to_surah')
+                        : $record->to_surah;
+
+
+                $toAyah =
+                    $request->has('to_ayah')
+                        ? $request->input('to_ayah')
+                        : $record->to_ayah;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | التأكد من اكتمال نطاق القرآن
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $fromSurah === null ||
+                    $fromAyah === null ||
+                    $toSurah === null ||
+                    $toAyah === null
+                ) {
+
+                    DB::rollBack();
+
+                    return response()->json([
+
+                        'message' =>
+                            'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الأوراق'
+
+                    ], 422);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | حساب عدد الصفحات
+                |--------------------------------------------------------------------------
+                */
+
+                $numOfPages =
+                    $quranPageService->calculatePages(
+                        $fromSurah,
+                        $fromAyah,
+                        $toSurah,
+                        $toAyah
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | حساب عدد الأوراق
+                |--------------------------------------------------------------------------
+                */
+
+                $numOfSheets =
+                    $quranPageService->calculateSheets(
+                        $numOfPages
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | حفظ القيمة المحسوبة
+                |--------------------------------------------------------------------------
+                */
+
+                $updateData['num_of_sheets'] =
+                    $numOfSheets;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | لا يوجد شيء لتحديثه
+            |--------------------------------------------------------------------------
+            */
+
+            if (empty($updateData)) {
+
+                DB::rollBack();
+
+                return response()->json([
+
+                    'message' =>
+                        'لم يتم إرسال أي بيانات لتحديث السجل'
+
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | تنفيذ التحديث
+            |--------------------------------------------------------------------------
+            */
+
+            $record->update(
+                $updateData
+            );
 
 
             /*

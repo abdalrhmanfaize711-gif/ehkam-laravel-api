@@ -41,10 +41,8 @@ class AdditionRecordsController extends Controller
         DB::beginTransaction();
 
         try {
-           
-       
+
             /*
-            
             |--------------------------------------------------------------------------
             | تحديد هل الطلب Record واحد أم أكثر من Record
             |--------------------------------------------------------------------------
@@ -130,15 +128,6 @@ class AdditionRecordsController extends Controller
             |--------------------------------------------------------------------------
             | تحديد هل الطلب مراجعة فقط
             |--------------------------------------------------------------------------
-            |
-            | إذا كان الطلب يحتوي فقط على:
-            |
-            | student_id
-            | general_revision
-            | daily_revision
-            |
-            | ولا يحتوي على بيانات الحفظ.
-            |
             */
 
             $firstRecord = $records[0];
@@ -166,12 +155,6 @@ class AdditionRecordsController extends Controller
 
                 foreach ($records as $data) {
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | إشعار الربط العام
-                    |--------------------------------------------------------------------------
-                    */
-
                     if (
                         ($data['general_revision'] ?? false) == 0 ||
                         ($data['general_revision'] ?? false) == false
@@ -190,7 +173,6 @@ class AdditionRecordsController extends Controller
 
 
                 DB::commit();
-
 
                 return response()->json([
 
@@ -247,18 +229,27 @@ class AdditionRecordsController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | التحقق من بيانات القرآن
+                | التحقق من أن المستخدم المرتبط طالب
                 |--------------------------------------------------------------------------
-                |
-                | لا نعتمد على num_of_pages المرسل من Flutter.
-                |
-                | يجب إرسال:
-                |
-                | from_surah
-                | from_ayah
-                | to_surah
-                | to_ayah
-                |
+                */
+
+                $recordRole = User::where(
+                    'id',
+                    $recordStudent->user_id
+                )->value('role');
+
+                if ($recordRole !== 'student') {
+
+                    throw new \Exception(
+                        'المستخدم المرتبط ليس طالباً: ' . $recordStudentId
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | بيانات القرآن
+                |--------------------------------------------------------------------------
                 */
 
                 $fromSurah = $data['from_surah'] ?? null;
@@ -269,26 +260,49 @@ class AdditionRecordsController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
+                | التحقق من اكتمال بيانات القرآن
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $fromSurah === null ||
+                    $fromAyah === null ||
+                    $toSurah === null ||
+                    $toAyah === null
+                ) {
+
+                    throw new \InvalidArgumentException(
+                        'يجب إرسال from_surah و from_ayah و to_surah و to_ayah'
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | منع Flutter من إرسال num_of_pages
+                |--------------------------------------------------------------------------
+                */
+
+                if (array_key_exists('num_of_pages', $data)) {
+
+                    throw new \InvalidArgumentException(
+                        'num_of_pages يتم حسابه تلقائياً ولا يمكن إرساله من Flutter'
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
                 | حساب عدد الصفحات
                 |--------------------------------------------------------------------------
                 */
 
-                $numOfPages = null;
-
-                if (
-                    $fromSurah !== null &&
-                    $fromAyah !== null &&
-                    $toSurah !== null &&
-                    $toAyah !== null
-                ) {
-
-                    $numOfPages = $quranPageService->calculatePages(
-                        $fromSurah,
-                        $fromAyah,
-                        $toSurah,
-                        $toAyah
-                    );
-                }
+                $numOfPages = $quranPageService->calculatePages(
+                    $fromSurah,
+                    $fromAyah,
+                    $toSurah,
+                    $toAyah
+                );
 
 
                 /*
@@ -303,11 +317,9 @@ class AdditionRecordsController extends Controller
                         $recordStudentId,
 
                     /*
-                    |------------------------------------------------------------------
-                    | مهم:
-                    | هذا الرقم محسوب من QuranPageService
-                    | وليس من Flutter.
-                    |------------------------------------------------------------------
+                    |--------------------------------------------------------------------------
+                    | محسوبة بواسطة QuranPageService
+                    |--------------------------------------------------------------------------
                     */
 
                     'num_of_pages' =>
@@ -676,14 +688,15 @@ class AdditionRecordsController extends Controller
     |--------------------------------------------------------------------------
     |
     | مهم:
-    | عند التعديل أيضاً لا نأخذ num_of_pages من Flutter.
+    | num_of_pages لا يتم أخذه من Flutter.
     |
-    | نقوم بإعادة حسابه من:
-    |
+    | إذا تغيرت بيانات القرآن:
     | from_surah
     | from_ayah
     | to_surah
     | to_ayah
+    |
+    | يتم إعادة حساب num_of_pages بواسطة QuranPageService.
     |
     */
 
@@ -771,88 +784,186 @@ class AdditionRecordsController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | بيانات القرآن الجديدة
+            | منع تعديل num_of_pages يدوياً
             |--------------------------------------------------------------------------
             */
 
-            $fromSurah = $request->from_surah;
-            $fromAyah  = $request->from_ayah;
-            $toSurah   = $request->to_surah;
-            $toAyah    = $request->to_ayah;
+            if ($request->has('num_of_pages')) {
 
+                DB::rollBack();
 
-            /*
-            |--------------------------------------------------------------------------
-            | إعادة حساب عدد الصفحات
-            |--------------------------------------------------------------------------
-            */
+                return response()->json([
 
-            $numOfPages = null;
+                    'message' =>
+                        'num_of_pages يتم حسابه تلقائياً ولا يمكن تعديله يدوياً'
 
-            if (
-                $fromSurah !== null &&
-                $fromAyah !== null &&
-                $toSurah !== null &&
-                $toAyah !== null
-            ) {
-
-                $numOfPages = $quranPageService->calculatePages(
-                    $fromSurah,
-                    $fromAyah,
-                    $toSurah,
-                    $toAyah
-                );
+                ], 422);
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | تحديث السجل
+            | Prepare Update Data
             |--------------------------------------------------------------------------
             */
 
-            $record->update([
+            $updateData = [];
 
-                'student_id' =>
-                    $request->student_id,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Common Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $commonFields = [
+                'student_id',
+                'from_surah',
+                'from_ayah',
+                'to_surah',
+                'to_ayah',
+                'repeated_times',
+                'memorization_state',
+                'addition_date',
+                'general_revision',
+                'daily_revision',
+            ];
+
+
+            foreach ($commonFields as $field) {
+
+                if ($request->has($field)) {
+
+                    $updateData[$field] =
+                        $request->input($field);
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check Quran Fields Changed
+            |--------------------------------------------------------------------------
+            */
+
+            $quranFieldChanged =
+                $request->has('from_surah') ||
+                $request->has('from_ayah') ||
+                $request->has('to_surah') ||
+                $request->has('to_ayah');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Recalculate Number Of Pages
+            |--------------------------------------------------------------------------
+            */
+
+            if ($quranFieldChanged) {
 
                 /*
-                |------------------------------------------------------------------
-                | محسوبة من QuranPageService
-                |------------------------------------------------------------------
+                |--------------------------------------------------------------------------
+                | إذا أرسل Flutter قيمة جديدة نستخدمها،
+                | وإذا لم يرسلها نستخدم القيمة القديمة.
+                |--------------------------------------------------------------------------
                 */
 
-                'num_of_pages' =>
-                    $numOfPages,
+                $fromSurah = $request->has('from_surah')
+                    ? $request->input('from_surah')
+                    : $record->from_surah;
 
-                'from_surah' =>
-                    $fromSurah,
 
-                'from_ayah' =>
-                    $fromAyah,
+                $fromAyah = $request->has('from_ayah')
+                    ? $request->input('from_ayah')
+                    : $record->from_ayah;
 
-                'to_surah' =>
-                    $toSurah,
 
-                'to_ayah' =>
-                    $toAyah,
+                $toSurah = $request->has('to_surah')
+                    ? $request->input('to_surah')
+                    : $record->to_surah;
 
-                'repeated_times' =>
-                    $request->repeated_times,
 
-                'memorization_state' =>
-                    $request->memorization_state,
+                $toAyah = $request->has('to_ayah')
+                    ? $request->input('to_ayah')
+                    : $record->to_ayah;
 
-                'addition_date' =>
-                    $request->addition_date,
 
-                'general_revision' =>
-                    $request->general_revision,
+                /*
+                |--------------------------------------------------------------------------
+                | التأكد من وجود جميع بيانات القرآن
+                |--------------------------------------------------------------------------
+                */
 
-                'daily_revision' =>
-                    $request->daily_revision,
+                if (
+                    $fromSurah === null ||
+                    $fromAyah === null ||
+                    $toSurah === null ||
+                    $toAyah === null
+                ) {
 
-            ]);
+                    DB::rollBack();
+
+                    return response()->json([
+
+                        'message' =>
+                            'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الصفحات'
+
+                    ], 422);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | QuranPageService
+                |--------------------------------------------------------------------------
+                */
+
+                $numOfPages =
+                    $quranPageService->calculatePages(
+                        $fromSurah,
+                        $fromAyah,
+                        $toSurah,
+                        $toAyah
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | حفظ القيمة المحسوبة
+                |--------------------------------------------------------------------------
+                */
+
+                $updateData['num_of_pages'] =
+                    $numOfPages;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | لا يوجد شيء لتحديثه
+            |--------------------------------------------------------------------------
+            */
+
+            if (empty($updateData)) {
+
+                DB::rollBack();
+
+                return response()->json([
+
+                    'message' =>
+                        'لم يتم إرسال أي بيانات لتحديث السجل'
+
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | تنفيذ التحديث
+            |--------------------------------------------------------------------------
+            */
+
+            $record->update($updateData);
 
 
             /*
@@ -1061,9 +1172,9 @@ class AdditionRecordsController extends Controller
             ) {
 
                 /*
-                |--------------------------------------------------------------
-                | num_of_pages أصبح محسوباً مسبقاً بواسطة QuranPageService
-                |--------------------------------------------------------------
+                |--------------------------------------------------------------------------
+                | num_of_pages محسوبة مسبقاً بواسطة QuranPageService
+                |--------------------------------------------------------------------------
                 */
 
                 $monthlyPages +=

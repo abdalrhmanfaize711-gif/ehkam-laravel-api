@@ -139,14 +139,14 @@ Route::get('/get_all_serd_schedule', [SardScheduleController::class,'index']);
 Route::post('/get_special_serd_schedule', [SardScheduleController::class,'show']);
 Route::put('/update_serd_schedule', [SardScheduleController::class,'update']);
 Route::delete('/delete_serd_schedule', [SardScheduleController::class,'destroy']);
-          
+Route::get('/get_all_region', [RegionController::class, 'get_all_region']);
                    //SardRecordsController
      
           
            // Recored Exams Routes
      
            
-           //RecordSardDaysController
+           //RecordSardDaysControllerv
             
 });
 

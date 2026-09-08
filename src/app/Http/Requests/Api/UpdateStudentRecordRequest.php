@@ -7,8 +7,8 @@ class UpdateStudentRecordRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required', 'integer'],
-            'student_id' => ['required', 'integer', 'exists:students,id'],
+            
+            'student_id' => ['required', 'integer'],
             'teacher_id' => ['nullable', 'integer', 'exists:teachers,id'],
             'from_surah' => ['nullable', 'string', 'max:100'],
             'from_ayah' => ['nullable', 'integer', 'min:1'],
