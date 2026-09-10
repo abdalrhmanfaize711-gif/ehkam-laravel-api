@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Api\AddEtqanRecordRequest;
 use App\Http\Requests\Api\IdRequest;
 use App\Http\Requests\Api\UpdateEtqanRecordRequest;
-
+use App\Http\Requests\Api\UpdateStudentRecordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -153,8 +153,8 @@ class EtqanRecordController extends Controller
                 !isset($firstRecord['to_surah']) &&
                 !isset($firstRecord['to_ayah']) &&
                 !isset($firstRecord['num_of_sheets']) &&
-                !isset($firstRecord['memorization_state']);
-
+                !isset($firstRecord['memorization_state']) &&
+                !isset($firstRecord['total_mistakes']);
 
             /*
             |--------------------------------------------------------------------------
@@ -387,6 +387,8 @@ class EtqanRecordController extends Controller
 
                     'memorization_state' =>
                         $data['memorization_state'] ?? null,
+                    'total_mistakes' =>
+                        $data['total_mistakes'] ?? null,
 
                     'general_revision' =>
                         $data['general_revision'] ?? false,
@@ -860,384 +862,347 @@ class EtqanRecordController extends Controller
     |
     */
 
-    public function update_record(
-        UpdateEtqanRecordRequest $request,
-        QuranPageService $quranPageService
-    ) {
-        DB::beginTransaction();
-
-        try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | جلب السجل
-            |--------------------------------------------------------------------------
-            */
-
-            $record =
-                EtqanRecordModel::find(
-                    $request->id
-                );
-
-
-            if (!$record) {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'لم يتم العثور على السجل'
-
-                ], 404);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | جلب الطالب
-            |--------------------------------------------------------------------------
-            */
-
-            $student =
-                StudentModel::find(
-                    $request->student_id
-                );
-
-
-            if (!$student) {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'لم يتم العثور على الطالب'
-
-                ], 404);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | التحقق من أن المستخدم طالب
-            |--------------------------------------------------------------------------
-            */
-
-            $role =
-                User::where(
-                    'id',
-                    $student->user_id
-                )
-                ->value('role');
-
-
-            if ($role !== 'student') {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'ليس معرفاً كطالب'
-
-                ], 400);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | منع تعديل num_of_sheets يدوياً
-            |--------------------------------------------------------------------------
-            */
-
-            if ($request->has('num_of_sheets')) {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'num_of_sheets يتم حسابه تلقائياً ولا يمكن تعديله يدوياً'
-
-                ], 422);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | منع إرسال num_of_pages
-            |--------------------------------------------------------------------------
-            |
-            | جدول الإتقان لا يحتاج num_of_pages.
-            | نستخدمه داخلياً فقط للحساب.
-            |
-            */
-
-            if ($request->has('num_of_pages')) {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'num_of_pages غير مسموح به في سجل الإتقان'
-
-                ], 422);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Prepare Update Data
-            |--------------------------------------------------------------------------
-            */
-
-            $updateData = [];
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Common Fields
-            |--------------------------------------------------------------------------
-            */
-
-            $commonFields = [
-                'student_id',
-                'from_surah',
-                'from_ayah',
-                'to_surah',
-                'to_ayah',
-                'memorization_state',
-                'general_revision',
-                'addition_date',
-            ];
-
-
-            foreach ($commonFields as $field) {
-
-                if ($request->has($field)) {
-
-                    $updateData[$field] =
-                        $request->input($field);
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | هل تغيرت بيانات القرآن؟
-            |--------------------------------------------------------------------------
-            */
-
-            $quranFieldChanged =
-                $request->has('from_surah') ||
-                $request->has('from_ayah') ||
-                $request->has('to_surah') ||
-                $request->has('to_ayah');
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | إعادة حساب عدد الأوراق
-            |--------------------------------------------------------------------------
-            */
-
-            if ($quranFieldChanged) {
-
-                /*
-                |--------------------------------------------------------------------------
-                | استخدام القيمة الجديدة إذا أرسلها Flutter
-                | وإلا استخدام القيمة القديمة من Database
-                |--------------------------------------------------------------------------
-                */
-
-                $fromSurah =
-                    $request->has('from_surah')
-                        ? $request->input('from_surah')
-                        : $record->from_surah;
-
-
-                $fromAyah =
-                    $request->has('from_ayah')
-                        ? $request->input('from_ayah')
-                        : $record->from_ayah;
-
-
-                $toSurah =
-                    $request->has('to_surah')
-                        ? $request->input('to_surah')
-                        : $record->to_surah;
-
-
-                $toAyah =
-                    $request->has('to_ayah')
-                        ? $request->input('to_ayah')
-                        : $record->to_ayah;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | التأكد من اكتمال نطاق القرآن
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    $fromSurah === null ||
-                    $fromAyah === null ||
-                    $toSurah === null ||
-                    $toAyah === null
-                ) {
-
-                    DB::rollBack();
-
-                    return response()->json([
-
-                        'message' =>
-                            'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الأوراق'
-
-                    ], 422);
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | حساب عدد الصفحات
-                |--------------------------------------------------------------------------
-                */
-
-                $numOfPages =
-                    $quranPageService->calculatePages(
-                        $fromSurah,
-                        $fromAyah,
-                        $toSurah,
-                        $toAyah
-                    );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | حساب عدد الأوراق
-                |--------------------------------------------------------------------------
-                */
-
-                $numOfSheets =
-                    $quranPageService->calculateSheets(
-                        $numOfPages
-                    );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | حفظ القيمة المحسوبة
-                |--------------------------------------------------------------------------
-                */
-
-                $updateData['num_of_sheets'] =
-                    $numOfSheets;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | لا يوجد شيء لتحديثه
-            |--------------------------------------------------------------------------
-            */
-
-            if (empty($updateData)) {
-
-                DB::rollBack();
-
-                return response()->json([
-
-                    'message' =>
-                        'لم يتم إرسال أي بيانات لتحديث السجل'
-
-                ], 422);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | تنفيذ التحديث
-            |--------------------------------------------------------------------------
-            */
-
-            $record->update(
-                $updateData
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | إضافة ملاحظة
-            |--------------------------------------------------------------------------
-            */
-
-            $note = null;
-
-
-            if (!empty($request->notes_text)) {
-
-                $note = NotsModel::create([
-
-                    'text_nots' =>
-                        $request->notes_text,
-
-                    'teacher_id' =>
-                        $request->teacher_id,
-
-                    'student_id' =>
-                        $request->student_id,
-
-                    'insert_date' =>
-                        now(),
-
-                ]);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Commit
-            |--------------------------------------------------------------------------
-            */
-
-            DB::commit();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Response
-            |--------------------------------------------------------------------------
-            */
-
-            return response()->json([
-
-                'message' =>
-                    'تم تحديث سجل الإتقان بنجاح',
-
-                'record' =>
-                    $record->fresh(),
-
-                'note' =>
-                    $note,
-
-            ], 200);
-
-
-        } catch (\Exception $e) {
+   public function update_etqan_record(
+    UpdateStudentRecordRequest $request,
+    QuranPageService $quranPageService
+) {
+    DB::beginTransaction();
+
+    try {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Student
+        |--------------------------------------------------------------------------
+        */
+
+        $student = StudentModel::find($request->student_id);
+
+        if (!$student) {
 
             DB::rollBack();
 
             return response()->json([
-
-                'message' =>
-                    $e->getMessage()
-
-            ], 500);
+                'success' => false,
+                'message' => 'لم يتم العثور على الطالب',
+            ], 404);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify User Role
+        |--------------------------------------------------------------------------
+        */
+
+        $role = User::where(
+            'id',
+            $student->user_id
+        )->value('role');
+
+        if ($role !== 'student') {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'المستخدم المرتبط ليس طالباً',
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify Stage
+        |--------------------------------------------------------------------------
+        */
+
+        $etqanStages = [
+            'إتقان أول',
+            'إتقان ثاني',
+            'إتقان ثالث',
+        ];
+
+        $stage = trim($student->stage);
+
+        if (!in_array($stage, $etqanStages, true)) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'الطالب ليس في مرحلة الإتقان',
+                'stage' => $student->stage,
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reject Addition-only Fields
+        |--------------------------------------------------------------------------
+        */
+
+        $additionOnlyFields = [
+            'repeated_times',
+            'daily_revision',
+        ];
+
+        foreach ($additionOnlyFields as $field) {
+
+            if ($request->has($field)) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        "الحقل {$field} غير مسموح به في سجل الإتقان",
+                ], 422);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reject num_of_sheets
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->has('num_of_sheets')) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'الحقل num_of_sheets يتم حسابه تلقائياً ولا يمكن تعديله يدوياً',
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reject num_of_pages
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->has('num_of_pages')) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'الحقل num_of_pages غير مسموح به في سجل الإتقان',
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Latest Etqan Record
+        |--------------------------------------------------------------------------
+        */
+
+        $record = EtqanRecordModel::where(
+            'student_id',
+            $student->id
+        )
+            ->orderByDesc('addition_date')
+            ->first();
+
+        if (!$record) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'لم يتم العثور على سجل الإتقان لهذا الطالب',
+            ], 404);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prepare Update Data
+        |--------------------------------------------------------------------------
+        */
+
+        $updateData = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Common Fields
+        |--------------------------------------------------------------------------
+        */
+
+        $commonFields = [
+            'from_surah',
+            'from_ayah',
+            'to_surah',
+            'to_ayah',
+            'total_mistakes',
+            'memorization_state',
+            'addition_date',
+            'general_revision',
+        ];
+
+        foreach ($commonFields as $field) {
+
+            if ($request->has($field)) {
+
+                $updateData[$field] =
+                    $request->input($field);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Etqan-only Fields
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->has('total_mistakes')) {
+
+            $updateData['total_mistakes'] =
+                $request->input('total_mistakes');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Quran Fields
+        |--------------------------------------------------------------------------
+        */
+
+        $quranFieldChanged =
+            $request->has('from_surah') ||
+            $request->has('from_ayah') ||
+            $request->has('to_surah') ||
+            $request->has('to_ayah');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recalculate Pages + Sheets
+        |--------------------------------------------------------------------------
+        */
+
+        if ($quranFieldChanged) {
+
+            $fromSurah = $request->has('from_surah')
+                ? $request->input('from_surah')
+                : $record->from_surah;
+
+            $fromAyah = $request->has('from_ayah')
+                ? $request->input('from_ayah')
+                : $record->from_ayah;
+
+            $toSurah = $request->has('to_surah')
+                ? $request->input('to_surah')
+                : $record->to_surah;
+
+            $toAyah = $request->has('to_ayah')
+                ? $request->input('to_ayah')
+                : $record->to_ayah;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Quran Range
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $fromSurah === null ||
+                $fromAyah === null ||
+                $toSurah === null ||
+                $toAyah === null
+            ) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الأوراق',
+                ], 422);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Calculate Pages
+            |--------------------------------------------------------------------------
+            */
+
+            $numOfPages =
+                $quranPageService->calculatePages(
+                    $fromSurah,
+                    $fromAyah,
+                    $toSurah,
+                    $toAyah
+                );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Calculate Sheets
+            |--------------------------------------------------------------------------
+            */
+
+            $numOfSheets =
+                $quranPageService->calculateSheets(
+                    $numOfPages
+                );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Calculated Sheets
+            |--------------------------------------------------------------------------
+            */
+
+            $updateData['num_of_sheets'] =
+                $numOfSheets;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Update Data
+        |--------------------------------------------------------------------------
+        */
+
+        if (empty($updateData)) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'لم يتم إرسال أي بيانات لتحديث السجل',
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Record
+        |--------------------------------------------------------------------------
+        */
+
+        $record->update($updateData);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث سجل الإتقان بنجاح',
+            'record_type' => 'etqan',
+            'stage' => $stage,
+            'student_id' => $student->id,
+            'record' => $record->fresh(),
+        ], 200);
+
+    } catch (\Throwable $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'حدث خطأ أثناء تحديث سجل الإتقان',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
 
     /*

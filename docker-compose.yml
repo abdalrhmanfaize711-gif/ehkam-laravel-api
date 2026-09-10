@@ -24,7 +24,7 @@ services:
       DB_DATABASE: ehkam_db
       DB_USERNAME: ehkam_pro
       DB_PASSWORD: ehkam_password
-
+   
       # Redis
       REDIS_CLIENT: phpredis
       REDIS_HOST: redis
@@ -100,7 +100,8 @@ services:
       MYSQL_DATABASE: ehkam_db
       MYSQL_USER: ehkam_pro
       MYSQL_PASSWORD: ehkam_password
-
+    ports:
+    - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 

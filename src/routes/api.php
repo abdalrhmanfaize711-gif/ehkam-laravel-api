@@ -53,7 +53,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
            Route::post('/add_student', [StudentController::class, 'Add_student']);
            Route::post('/get_records_by_date', [StudentController::class, 'getStudentRecordsByDate']);
            Route::post('/add_student_json', [StudentController::class, 'Add_students']);
-           Route::put('/update_record_of_STD', [StudentController::class, 'update_record_of_STD']);
            Route::put('/update_student', [StudentController::class, 'update_student']);
            Route::delete('/delete_student', [StudentController::class, 'delete_student']);
            Route::put('/Delete_STD_from_halaqa', [StudentController::class, 'Delete_STD_from_halaqa']);
@@ -130,16 +129,18 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
            Route::put('/update_scheduled_exams', [ScheduledExamsController::class, 'update_scheduled_exams']);
            Route::delete('/delete_scheduled_exams', [ScheduledExamsController::class, 'delete_scheduled_exams']);
            
-           // Scheduled Sard Stage Routes
+           // Addtion records routes
+           Route::put('/update_addition_record', [AdditionRecordsController::class, 'update_addition_record']);
            
-           // Sard Schedule Routes
+           //Etqan records routes
+           Route::put('/update_etqan_record', [EtqanRecordController::class, 'update_etqan_record']);
 
-Route::post('/add_sard', [SardScheduleController::class,'store']);
-Route::get('/get_all_serd_schedule', [SardScheduleController::class,'index']);
-Route::post('/get_special_serd_schedule', [SardScheduleController::class,'show']);
-Route::put('/update_serd_schedule', [SardScheduleController::class,'update']);
-Route::delete('/delete_serd_schedule', [SardScheduleController::class,'destroy']);
-Route::get('/get_all_region', [RegionController::class, 'get_all_region']);
+           Route::post('/add_sard', [SardScheduleController::class,'store']);
+           Route::get('/get_all_serd_schedule', [SardScheduleController::class,'index']);
+           Route::post('/get_special_serd_schedule', [SardScheduleController::class,'show']);
+           Route::put('/update_serd_schedule', [SardScheduleController::class,'update']);
+           Route::delete('/delete_serd_schedule', [SardScheduleController::class,'destroy']);
+           Route::get('/get_all_region', [RegionController::class, 'get_all_region']);
                    //SardRecordsController
      
           
@@ -183,6 +184,7 @@ Route::middleware(['auth:sanctum', 'role:admin,teacher'])->group(function () {
     Route::post('/get_one_record-sard-days', [RecordSardDaysController::class, 'get_special_record_sard_day']);
     Route::put('/update_record-sard-days', [RecordSardDaysController::class, 'update_record_sard_day']);
     Route::delete('/record-sard-days', [RecordSardDaysController::class, 'delete_record_sard_day']);
+     Route::post('/get_student_record_profile',[StudentRecordProfileController::class, 'getStudentRecordProfile']);
 });
 
 
@@ -200,11 +202,13 @@ Route::middleware(['auth:sanctum', 'role:admin,teacher', 'teacher.scope'])->grou
       Route::get('/get_record', [AdditionRecordsController::class, 'get_all_record']);
       Route::post('/add_record', [AdditionRecordsController::class, 'add_addition_records']);
       Route::delete('/delete', [AdditionRecordsController::class, 'delete']);
-      
+      Route::put('/update_addition_record', [AdditionRecordsController::class, 'update_addition_record']);
       // Etqan Records Routes
+
       Route::get('/get_all_etqan', [EtqanRecordController::class, 'get_all_record']);
       Route::post('/add_etqan_records', [EtqanRecordController::class, 'add_etqan_records']);
       Route::delete('/delete_etqan', [EtqanRecordController::class, 'delete']);
+      Route::put('/update_etqan_record', [EtqanRecordController::class, 'update_etqan_record']);
 
       //SardRecordsController
 
@@ -243,12 +247,3 @@ Route::middleware(['auth:sanctum', 'role:admin,teacher', 'teacher.scope'])->grou
     
 });
 
-Route::post('/test-json', function (\Illuminate\Http\Request $request) {
-    return response()->json([
-        'is_json' => $request->isJson(),
-        'content' => $request->getContent(),
-        'json' => $request->json()->all(),
-        'request' => $request->request->all(),
-        'all' => $request->all(),
-    ]);
-});

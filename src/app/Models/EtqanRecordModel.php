@@ -15,6 +15,7 @@ class EtqanRecordModel extends Model
         'to_surah',
         'to_ayah',
         'memorization_state',
+        'total_mistakes',
         'general_revision',
         'addition_date',
     ];
