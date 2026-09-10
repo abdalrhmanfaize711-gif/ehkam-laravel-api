@@ -15,20 +15,21 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+       // Delete old seeded data
+        DB::table('admin')->delete();
+        DB::table('region')->delete();
+        DB::table('quran_ayah_pages')->delete();
         // User::factory(10)->create();
            $this->call([
             QuranAyahPageSeeder::class,
+             AdminSeeder::class,
+            RegionsSeeder::class,
         ]);
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-                $this->call([
-            AdminSeeder::class,
-        ]);
-            $this->call([
-            RegionsSeeder::class,
-        ]);
-        
+
     }
 }
