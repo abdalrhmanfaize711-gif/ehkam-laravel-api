@@ -26,11 +26,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create test user only if it doesn't exist
-        User::updateOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-            ]
-        );
+        
     }
 }
