@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     libzip-dev \
     libonig-dev \
+    libpq-dev \
     && docker-php-ext-install \
         pdo \
-        pdo_mysql \
+        pdo_pgsql \
         mbstring \
         zip \
     && pecl install redis \
@@ -57,7 +58,7 @@ RUN mkdir -p \
 
 # ============================================================
 # Application port
-# DockHosting will send traffic to this port
+# DockHosting provides PORT
 # ============================================================
 EXPOSE 8080
 
