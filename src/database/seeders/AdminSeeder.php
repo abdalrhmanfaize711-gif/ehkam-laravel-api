@@ -11,10 +11,12 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         AdminModel::create([
+            
             'username' => 'admin',
             'password' => Hash::make('ehkamadmin123'),
         ]);
           AdminModel::create([
+            
             'username' => 'ehkam',
             'password' => Hash::make('superadmin'),
         ]);
