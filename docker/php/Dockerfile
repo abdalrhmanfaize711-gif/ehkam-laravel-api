@@ -1,6 +1,9 @@
-FROM php:8.4-cli
 
+FROM php:8.4-fpm
+
+# ============================================================
 # System packages
+# ============================================================
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -18,29 +21,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# ============================================================
 # Composer
+# ============================================================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# ============================================================
+# Laravel
+# ============================================================
 WORKDIR /var/www/html
 
-# Copy Laravel application
-COPY src/ /var/www/html/
+# PHP-FPM listens on port 9000 internally
+EXPOSE 9000
 
-# Install PHP dependencies
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction
-
-# Laravel storage permissions
-RUN mkdir -p storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
-# DockHosting HTTP port
-EXPOSE 8080
-
-# Start Laravel
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+# Explicitly use the PHP-FPM binary
+CMD ["/usr/local/sbin/php-fpm", "-F"]

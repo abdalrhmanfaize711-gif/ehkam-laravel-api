@@ -9,7 +9,7 @@ class UpdateStudentRecordRequest extends ApiFormRequest
         return [
             
             'student_id' => ['required', 'integer'],
-            'total_mistakes' => ['required', 'integer', 'min:0'],
+            'total_mistakes' => ['nullable', 'integer', 'min:0'],
             'from_surah' => ['nullable', 'string', 'max:100'],
             'from_ayah' => ['nullable', 'integer', 'min:1'],
             'to_surah' => ['nullable', 'string', 'max:100'],
