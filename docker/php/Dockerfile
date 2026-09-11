@@ -1,6 +1,9 @@
+
 FROM php:8.4-fpm
 
+# ============================================================
 # System packages
+# ============================================================
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -18,12 +21,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# ============================================================
 # Composer
+# ============================================================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# ============================================================
+# Laravel
+# ============================================================
 WORKDIR /var/www/html
 
 # PHP-FPM listens on port 9000 internally
 EXPOSE 9000
 
-CMD ["php-fpm"]
+# Explicitly use the PHP-FPM binary
+CMD ["/usr/local/sbin/php-fpm", "-F"]
