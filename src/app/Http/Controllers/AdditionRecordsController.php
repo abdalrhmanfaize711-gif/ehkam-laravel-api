@@ -32,6 +32,18 @@ class AdditionRecordsController extends Controller
      * from_ayah
      * to_surah
      * to_ayah
+     *
+     * الاستثناء:
+     *
+     * إذا كانت memorization_state = "لم يحفظ"
+     * وكان:
+     *
+     * from_surah = "لم يسمع"
+     * from_ayah  = 0
+     * to_surah   = "لم يسمع"
+     * to_ayah    = 0
+     *
+     * يتم قبول السجل وتكون الصفحات = 0.
      */
     public function add_addition_records(
         AddtionRecordRequest $request,
@@ -258,6 +270,9 @@ class AdditionRecordsController extends Controller
                 $toSurah   = $data['to_surah'] ?? null;
                 $toAyah    = $data['to_ayah'] ?? null;
 
+                $memorizationState =
+                    $data['memorization_state'] ?? null;
+
 
                 /*
                 |--------------------------------------------------------------------------
@@ -296,13 +311,30 @@ class AdditionRecordsController extends Controller
                 |--------------------------------------------------------------------------
                 | حساب عدد الصفحات
                 |--------------------------------------------------------------------------
+                |
+                | هنا نمرر memorization_state إلى QuranPageService.
+                |
+                | إذا كانت الحالة:
+                |
+                | "لم يحفظ"
+                |
+                | و From / To:
+                |
+                | "لم يسمع" / 0
+                |
+                | فإن QuranPageService سيقبل الحالة الاستثنائية
+                | ويعيد 0 صفحة.
+                |
+                | أما جميع الحالات الأخرى فتعمل بالطريقة العادية.
+                |--------------------------------------------------------------------------
                 */
 
                 $numOfPages = $quranPageService->calculatePages(
                     $fromSurah,
                     $fromAyah,
                     $toSurah,
-                    $toAyah
+                    $toAyah,
+                    $memorizationState
                 );
 
 
@@ -342,7 +374,7 @@ class AdditionRecordsController extends Controller
                         $data['repeated_times'] ?? null,
 
                     'memorization_state' =>
-                        $data['memorization_state'] ?? null,
+                        $memorizationState,
 
                     'addition_date' =>
                         $data['addition_date'] ?? null,
@@ -383,7 +415,7 @@ class AdditionRecordsController extends Controller
                 */
 
                 if (
-                    ($data['memorization_state'] ?? null) == 'لم يحفظ' ||
+                    ($memorizationState ?? null) == 'لم يحفظ' ||
                     ($data['daily_revision'] ?? false) == 0 ||
                     ($data['daily_revision'] ?? false) == false
                 ) {
@@ -701,304 +733,335 @@ class AdditionRecordsController extends Controller
     |
     */
 
-   public function update_addition_record(
-    UpdateStudentRecordRequest $request,
-    QuranPageService $quranPageService
-) {
-    DB::beginTransaction();
+    public function update_addition_record(
+        UpdateStudentRecordRequest $request,
+        QuranPageService $quranPageService
+    ) {
+        DB::beginTransaction();
 
-    try {
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get Student
-        |--------------------------------------------------------------------------
-        */
-
-        $student = StudentModel::find($request->student_id);
-
-        if (!$student) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'لم يتم العثور على الطالب',
-            ], 404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verify User Role
-        |--------------------------------------------------------------------------
-        */
-
-        $role = User::where(
-            'id',
-            $student->user_id
-        )->value('role');
-
-        if ($role !== 'student') {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'المستخدم المرتبط ليس طالباً',
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verify Stage
-        |--------------------------------------------------------------------------
-        */
-
-        if (trim($student->stage) !== 'إضافة') {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'الطالب ليس في مرحلة الإضافة',
-                'stage' => $student->stage,
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Reject Etqan-only Fields
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->has('num_of_sheets')) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'الحقل num_of_sheets غير مسموح به في سجل الإضافة',
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Reject num_of_pages
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->has('num_of_pages')) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'الحقل num_of_pages يتم حسابه تلقائياً ولا يمكن تعديله يدوياً',
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get Latest Addition Record
-        |--------------------------------------------------------------------------
-        */
-
-        $record = AdditionRecordsModel::where(
-            'student_id',
-            $student->id
-        )
-            ->orderByDesc('addition_date')
-            ->first();
-
-        if (!$record) {
-
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'لم يتم العثور على سجل الإضافة لهذا الطالب',
-            ], 404);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prepare Update Data
-        |--------------------------------------------------------------------------
-        */
-
-        $updateData = [];
-
-        /*
-        |--------------------------------------------------------------------------
-        | Common Fields
-        |--------------------------------------------------------------------------
-        */
-
-        $commonFields = [
-            'from_surah',
-            'from_ayah',
-            'to_surah',
-            'to_ayah',
-            'memorization_state',
-            'addition_date',
-            'general_revision',
-        ];
-
-        foreach ($commonFields as $field) {
-
-            if ($request->has($field)) {
-
-                $updateData[$field] =
-                    $request->input($field);
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Addition-only Fields
-        |--------------------------------------------------------------------------
-        */
-
-        $additionOnlyFields = [
-            'repeated_times',
-            'daily_revision',
-        ];
-
-        foreach ($additionOnlyFields as $field) {
-
-            if ($request->has($field)) {
-
-                $updateData[$field] =
-                    $request->input($field);
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Check Quran Fields
-        |--------------------------------------------------------------------------
-        */
-
-        $quranFieldChanged =
-            $request->has('from_surah') ||
-            $request->has('from_ayah') ||
-            $request->has('to_surah') ||
-            $request->has('to_ayah');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Recalculate Number Of Pages
-        |--------------------------------------------------------------------------
-        */
-
-        if ($quranFieldChanged) {
-
-            $fromSurah = $request->has('from_surah')
-                ? $request->input('from_surah')
-                : $record->from_surah;
-
-            $fromAyah = $request->has('from_ayah')
-                ? $request->input('from_ayah')
-                : $record->from_ayah;
-
-            $toSurah = $request->has('to_surah')
-                ? $request->input('to_surah')
-                : $record->to_surah;
-
-            $toAyah = $request->has('to_ayah')
-                ? $request->input('to_ayah')
-                : $record->to_ayah;
+        try {
 
             /*
             |--------------------------------------------------------------------------
-            | Validate Quran Range
+            | Get Student
             |--------------------------------------------------------------------------
             */
 
-            if (
-                $fromSurah === null ||
-                $fromAyah === null ||
-                $toSurah === null ||
-                $toAyah === null
-            ) {
+            $student = StudentModel::find($request->student_id);
+
+            if (!$student) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لم يتم العثور على الطالب',
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify User Role
+            |--------------------------------------------------------------------------
+            */
+
+            $role = User::where(
+                'id',
+                $student->user_id
+            )->value('role');
+
+            if ($role !== 'student') {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'المستخدم المرتبط ليس طالباً',
+                ], 422);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Stage
+            |--------------------------------------------------------------------------
+            */
+
+            if (trim($student->stage) !== 'إضافة') {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'الطالب ليس في مرحلة الإضافة',
+                    'stage' => $student->stage,
+                ], 422);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reject Etqan-only Fields
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->has('num_of_sheets')) {
 
                 DB::rollBack();
 
                 return response()->json([
                     'success' => false,
                     'message' =>
-                        'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الصفحات',
+                        'الحقل num_of_sheets غير مسموح به في سجل الإضافة',
                 ], 422);
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Calculate Pages
+            | Reject num_of_pages
             |--------------------------------------------------------------------------
             */
 
-            $numOfPages =
-                $quranPageService->calculatePages(
-                    $fromSurah,
-                    $fromAyah,
-                    $toSurah,
-                    $toAyah
-                );
+            if ($request->has('num_of_pages')) {
 
-            $updateData['num_of_pages'] =
-                $numOfPages;
-        }
+                DB::rollBack();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Check Update Data
-        |--------------------------------------------------------------------------
-        */
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'الحقل num_of_pages يتم حسابه تلقائياً ولا يمكن تعديله يدوياً',
+                ], 422);
+            }
 
-        if (empty($updateData)) {
+            /*
+            |--------------------------------------------------------------------------
+            | Get Latest Addition Record
+            |--------------------------------------------------------------------------
+            */
+
+            $record = AdditionRecordsModel::where(
+                'student_id',
+                $student->id
+            )
+                ->orderByDesc('addition_date')
+                ->first();
+
+            if (!$record) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'لم يتم العثور على سجل الإضافة لهذا الطالب',
+                ], 404);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prepare Update Data
+            |--------------------------------------------------------------------------
+            */
+
+            $updateData = [];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Common Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $commonFields = [
+                'from_surah',
+                'from_ayah',
+                'to_surah',
+                'to_ayah',
+                'memorization_state',
+                'addition_date',
+                'general_revision',
+            ];
+
+            foreach ($commonFields as $field) {
+
+                if ($request->has($field)) {
+
+                    $updateData[$field] =
+                        $request->input($field);
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Addition-only Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $additionOnlyFields = [
+                'repeated_times',
+                'daily_revision',
+            ];
+
+            foreach ($additionOnlyFields as $field) {
+
+                if ($request->has($field)) {
+
+                    $updateData[$field] =
+                        $request->input($field);
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check Quran Fields
+            |--------------------------------------------------------------------------
+            */
+
+            $quranFieldChanged =
+                $request->has('from_surah') ||
+                $request->has('from_ayah') ||
+                $request->has('to_surah') ||
+                $request->has('to_ayah');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Recalculate Number Of Pages
+            |--------------------------------------------------------------------------
+            */
+
+            if ($quranFieldChanged) {
+
+                $fromSurah = $request->has('from_surah')
+                    ? $request->input('from_surah')
+                    : $record->from_surah;
+
+                $fromAyah = $request->has('from_ayah')
+                    ? $request->input('from_ayah')
+                    : $record->from_ayah;
+
+                $toSurah = $request->has('to_surah')
+                    ? $request->input('to_surah')
+                    : $record->to_surah;
+
+                $toAyah = $request->has('to_ayah')
+                    ? $request->input('to_ayah')
+                    : $record->to_ayah;
+
+                /*
+                |--------------------------------------------------------------------------
+                | الحصول على حالة الحفظ
+                |--------------------------------------------------------------------------
+                |
+                | إذا أرسل Flutter memorization_state نستخدمه.
+                | وإذا لم يرسله نستخدم الحالة الموجودة في السجل.
+                |--------------------------------------------------------------------------
+                */
+
+                $memorizationState =
+                    $request->has('memorization_state')
+                        ? $request->input('memorization_state')
+                        : $record->memorization_state;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Validate Quran Range
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $fromSurah === null ||
+                    $fromAyah === null ||
+                    $toSurah === null ||
+                    $toAyah === null
+                ) {
+
+                    DB::rollBack();
+
+                    return response()->json([
+                        'success' => false,
+                        'message' =>
+                            'يجب تحديد بداية ونهاية الحفظ كاملة لحساب عدد الصفحات',
+                    ], 422);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate Pages
+                |--------------------------------------------------------------------------
+                |
+                | الحالة الاستثنائية:
+                |
+                | memorization_state = "لم يحفظ"
+                | from_surah = "لم يسمع"
+                | from_ayah  = 0
+                | to_surah   = "لم يسمع"
+                | to_ayah    = 0
+                |
+                | QuranPageService سيعيد 0.
+                |
+                | في جميع الحالات الأخرى الحساب طبيعي.
+                |--------------------------------------------------------------------------
+                */
+
+                $numOfPages =
+                    $quranPageService->calculatePages(
+                        $fromSurah,
+                        $fromAyah,
+                        $toSurah,
+                        $toAyah,
+                        $memorizationState
+                    );
+
+                $updateData['num_of_pages'] =
+                    $numOfPages;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check Update Data
+            |--------------------------------------------------------------------------
+            */
+
+            if (empty($updateData)) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'لم يتم إرسال أي بيانات لتحديث السجل',
+                ], 422);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Record
+            |--------------------------------------------------------------------------
+            */
+
+            $record->update($updateData);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث سجل الإضافة بنجاح',
+                'record_type' => 'addition',
+                'stage' => $student->stage,
+                'student_id' => $student->id,
+                'record' => $record->fresh(),
+            ], 200);
+
+        } catch (\Throwable $e) {
 
             DB::rollBack();
 
             return response()->json([
                 'success' => false,
-                'message' =>
-                    'لم يتم إرسال أي بيانات لتحديث السجل',
-            ], 422);
+                'message' => 'حدث خطأ أثناء تحديث سجل الإضافة',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update Record
-        |--------------------------------------------------------------------------
-        */
-
-        $record->update($updateData);
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تحديث سجل الإضافة بنجاح',
-            'record_type' => 'addition',
-            'stage' => $student->stage,
-            'student_id' => $student->id,
-            'record' => $record->fresh(),
-        ], 200);
-
-    } catch (\Throwable $e) {
-
-        DB::rollBack();
-
-        return response()->json([
-            'success' => false,
-            'message' => 'حدث خطأ أثناء تحديث سجل الإضافة',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
 
 
     /*

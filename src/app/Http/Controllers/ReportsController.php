@@ -3,17 +3,109 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Api\ReportRequest;
-
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use App\Models\StudentModel;
 use App\Models\TeacherModel;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
 class ReportsController extends Controller
 {
-  
+    public function teachersReport(ReportRequest $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
 
+        $request->validate([
+            'from_date' => [
+                'required',
+                'date',
+            ],
 
+            'to_date' => [
+                'required',
+                'date',
+                'after_or_equal:from_date',
+            ],
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | جلب المعلمين
+        |--------------------------------------------------------------------------
+        */
+
+        $query = DB::table('teachers');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ربط users للحصول على اسم المعلم
+        |--------------------------------------------------------------------------
+        */
+
+        if (Schema::hasTable('users')) {
+            $query->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'teachers.user_id'
+            );
+
+            $query->select(
+                'teachers.*',
+                'users.name as teacher_name'
+            );
+        } else {
+            $query->select('teachers.*');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ترتيب المعلمين
+        |--------------------------------------------------------------------------
+        */
+
+        $teachers = $query
+            ->orderBy('teachers.id')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | بناء التقرير لكل معلم
+        |--------------------------------------------------------------------------
+        */
+
+        $reports = [];
+
+        foreach ($teachers as $teacher) {
+            $reports[] = $this->buildTeacherReport(
+                $teacher,
+                $request->from_date,
+                $request->to_date
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json([
+            'success' => true,
+
+            'filters' => [
+                'from_date' => $request->from_date,
+                'to_date' => $request->to_date,
+            ],
+
+            'count' => count($reports),
+
+            'data' => $reports,
+        ], 200);
+    }
 
     public function studentsReport(ReportRequest $request)
     {
@@ -41,7 +133,6 @@ class ReportsController extends Controller
             ],
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | جلب الطلاب حسب المرحلة
@@ -54,7 +145,6 @@ class ReportsController extends Controller
                 $request->stage
             );
 
-
         /*
         |--------------------------------------------------------------------------
         | ربط users للحصول على اسم الطالب
@@ -62,7 +152,6 @@ class ReportsController extends Controller
         */
 
         if (Schema::hasTable('users')) {
-
             $query->leftJoin(
                 'users',
                 'users.id',
@@ -74,14 +163,11 @@ class ReportsController extends Controller
                 'students.*',
                 'users.name as student_name'
             );
-
         } else {
-
             $query->select(
                 'students.*'
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -93,7 +179,6 @@ class ReportsController extends Controller
             ->orderBy('students.id')
             ->get();
 
-
         /*
         |--------------------------------------------------------------------------
         | بناء التقرير لكل طالب
@@ -103,14 +188,12 @@ class ReportsController extends Controller
         $reports = [];
 
         foreach ($students as $student) {
-
             $reports[] = $this->buildStudentReport(
                 $student,
                 $request->from_date,
                 $request->to_date
             );
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -119,29 +202,19 @@ class ReportsController extends Controller
         */
 
         return response()->json([
-
             'success' => true,
 
             'filters' => [
-
-                'from_date' =>
-                    $request->from_date,
-
-                'to_date' =>
-                    $request->to_date,
-
-                'stage' =>
-                    $request->stage,
+                'from_date' => $request->from_date,
+                'to_date' => $request->to_date,
+                'stage' => $request->stage,
             ],
 
-            'count' =>
-                count($reports),
+            'count' => count($reports),
 
-            'data' =>
-                $reports,
+            'data' => $reports,
         ]);
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -154,9 +227,7 @@ class ReportsController extends Controller
         $fromDate,
         $toDate
     ) {
-
         $studentId = $student->id;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -164,13 +235,11 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $additionRecords =
-            $this->getAdditionRecords(
-                $studentId,
-                $fromDate,
-                $toDate
-            );
-
+        $additionRecords = $this->getAdditionRecords(
+            $studentId,
+            $fromDate,
+            $toDate
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -178,13 +247,11 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $etqanRecords =
-            $this->getEtqanRecords(
-                $studentId,
-                $fromDate,
-                $toDate
-            );
-
+        $etqanRecords = $this->getEtqanRecords(
+            $studentId,
+            $fromDate,
+            $toDate
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -192,11 +259,9 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $additionPages =
-            $this->calculateAdditionPages(
-                $additionRecords
-            );
-
+        $additionPages = $this->calculateAdditionPages(
+            $additionRecords
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -204,11 +269,9 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $etqanPages =
-            $this->calculateEtqanPages(
-                $etqanRecords
-            );
-
+        $etqanPages = $this->calculateEtqanPages(
+            $etqanRecords
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -216,11 +279,7 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $totalPages =
-            $additionPages
-            +
-            $etqanPages;
-
+        $totalPages = $additionPages + $etqanPages;
 
         /*
         |--------------------------------------------------------------------------
@@ -231,11 +290,9 @@ class ReportsController extends Controller
         |
         */
 
-        $totalParts =
-            $this->pagesToParts(
-                $totalPages
-            );
-
+        $totalParts = $this->pagesToParts(
+            $totalPages
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -243,12 +300,10 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $firstPosition =
-            $this->getFirstPosition(
-                $additionRecords,
-                $etqanRecords
-            );
-
+        $firstPosition = $this->getFirstPosition(
+            $additionRecords,
+            $etqanRecords
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -256,12 +311,10 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $lastPosition =
-            $this->getLastPosition(
-                $additionRecords,
-                $etqanRecords
-            );
-
+        $lastPosition = $this->getLastPosition(
+            $additionRecords,
+            $etqanRecords
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -269,12 +322,10 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $generalRevisionPages =
-            $this->calculateGeneralRevisionPages(
-                $additionRecords,
-                $etqanRecords
-            );
-
+        $generalRevisionPages = $this->calculateGeneralRevisionPages(
+            $additionRecords,
+            $etqanRecords
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -282,13 +333,11 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $attendance =
-            $this->getStudentAttendance(
-                $student->user_id,
-                $fromDate,
-                $toDate
-            );
-
+        $attendance = $this->getStudentAttendance(
+            $student->user_id,
+            $fromDate,
+            $toDate
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -297,103 +346,68 @@ class ReportsController extends Controller
         */
 
         return [
-
             'student' => [
+                'id' => $studentId,
 
-                'id' =>
-                    $studentId,
+                'name' => $student->student_name ?? null,
 
-                'name' =>
-                    $student->student_name
-                    ?? null,
+                'stage' => $student->stage ?? null,
 
-                'stage' =>
-                    $student->stage
-                    ?? null,
-
-                'halaqa_id' =>
-                    $student->halaqa_id
-                    ?? null,
+                'halaqa_id' => $student->halaqa_id ?? null,
             ],
-
 
             'period' => [
-
-                'from_date' =>
-                    $fromDate,
-
-                'to_date' =>
-                    $toDate,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
             ],
-
 
             'memorization' => [
+                'addition_pages' => round(
+                    $additionPages,
+                    2
+                ),
 
-                'addition_pages' =>
-                    round(
-                        $additionPages,
-                        2
-                    ),
+                'etqan_pages' => round(
+                    $etqanPages,
+                    2
+                ),
 
-                'etqan_pages' =>
-                    round(
-                        $etqanPages,
-                        2
-                    ),
+                'total_pages' => round(
+                    $totalPages,
+                    2
+                ),
 
-                'total_pages' =>
-                    round(
-                        $totalPages,
-                        2
-                    ),
-
-                'total_parts' =>
-                    round(
-                        $totalParts,
-                        2
-                    ),
+                'total_parts' => round(
+                    $totalParts,
+                    2
+                ),
             ],
-
 
             'positions' => [
-
-                'first_position' =>
-                    $firstPosition,
-
-                'last_position' =>
-                    $lastPosition,
+                'first_position' => $firstPosition,
+                'last_position' => $lastPosition,
             ],
-
 
             'general_revision' => [
+                'pages' => round(
+                    $generalRevisionPages,
+                    2
+                ),
 
-                'pages' =>
-                    round(
-                        $generalRevisionPages,
-                        2
+                'parts' => round(
+                    $this->pagesToParts(
+                        $generalRevisionPages
                     ),
-
-                'parts' =>
-                    round(
-                        $this->pagesToParts(
-                            $generalRevisionPages
-                        ),
-                        2
-                    ),
+                    2
+                ),
             ],
 
-
             'attendance' => [
-
-                'present_days' =>
-                    $attendance['present_days'],
-
-                'absent_days' =>
-                    $attendance['absent_days'],
+                'present_days' => $attendance['present_days'],
+                'absent_days' => $attendance['absent_days'],
             ],
         ];
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -406,11 +420,9 @@ class ReportsController extends Controller
         $fromDate,
         $toDate
     ) {
-
         if (!Schema::hasTable('addition_records')) {
             return collect();
         }
-
 
         return DB::table('addition_records')
             ->where(
@@ -432,7 +444,6 @@ class ReportsController extends Controller
             ->get();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | جلب سجلات الإتقان
@@ -444,11 +455,9 @@ class ReportsController extends Controller
         $fromDate,
         $toDate
     ) {
-
         if (!Schema::hasTable('etqan_record')) {
             return collect();
         }
-
 
         return DB::table('etqan_record')
             ->where(
@@ -470,32 +479,24 @@ class ReportsController extends Controller
             ->get();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | حساب صفحات الإضافة
     |--------------------------------------------------------------------------
     */
 
-    private function calculateAdditionPages(
-        $records
-    ) {
-
+    private function calculateAdditionPages($records)
+    {
         $pages = 0;
 
-
         foreach ($records as $record) {
-
             $pages += (float) (
-                $record->num_of_pages
-                ?? 0
+                $record->num_of_pages ?? 0
             );
         }
 
-
         return $pages;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -503,25 +504,18 @@ class ReportsController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function calculateEtqanPages(
-        $records
-    ) {
-
+    private function calculateEtqanPages($records)
+    {
         $pages = 0;
 
-
         foreach ($records as $record) {
-
             $pages += (float) (
-                $record->num_of_sheets
-                ?? 0
+                $record->num_of_sheets ?? 0
             );
         }
 
-
         return $pages;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -529,13 +523,10 @@ class ReportsController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function pagesToParts(
-        $pages
-    ) {
-
+    private function pagesToParts($pages)
+    {
         return ((float) $pages) / 20;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -547,78 +538,55 @@ class ReportsController extends Controller
         $additionRecords,
         $etqanRecords
     ) {
-
         $records = collect();
 
-
         /*
+        |--------------------------------------------------------------------------
         | Addition
+        |--------------------------------------------------------------------------
         */
 
         foreach ($additionRecords as $record) {
-
             $records->push([
+                'date' => $record->addition_date,
 
-                'date' =>
-                    $record->addition_date,
+                'from_surah' => $record->from_surah,
+                'from_ayah' => $record->from_ayah,
 
-                'from_surah' =>
-                    $record->from_surah,
+                'to_surah' => $record->to_surah,
+                'to_ayah' => $record->to_ayah,
 
-                'from_ayah' =>
-                    $record->from_ayah,
+                'type' => 'addition',
 
-                'to_surah' =>
-                    $record->to_surah,
-
-                'to_ayah' =>
-                    $record->to_ayah,
-
-                'type' =>
-                    'addition',
-
-                'id' =>
-                    $record->id,
+                'id' => $record->id,
             ]);
         }
 
-
         /*
+        |--------------------------------------------------------------------------
         | Etqan
+        |--------------------------------------------------------------------------
         */
 
         foreach ($etqanRecords as $record) {
-
             $records->push([
+                'date' => $record->addition_date,
 
-                'date' =>
-                    $record->addition_date,
+                'from_surah' => $record->from_surah,
+                'from_ayah' => $record->from_ayah,
 
-                'from_surah' =>
-                    $record->from_surah,
+                'to_surah' => $record->to_surah,
+                'to_ayah' => $record->to_ayah,
 
-                'from_ayah' =>
-                    $record->from_ayah,
+                'type' => 'etqan',
 
-                'to_surah' =>
-                    $record->to_surah,
-
-                'to_ayah' =>
-                    $record->to_ayah,
-
-                'type' =>
-                    'etqan',
-
-                'id' =>
-                    $record->id,
+                'id' => $record->id,
             ]);
         }
-
 
         if ($records->isEmpty()) {
             return null;
         }
-
 
         $first = $records
             ->sortBy([
@@ -627,23 +595,13 @@ class ReportsController extends Controller
             ])
             ->first();
 
-
         return [
-
-            'surah' =>
-                $first['from_surah'],
-
-            'ayah' =>
-                $first['from_ayah'],
-
-            'date' =>
-                $first['date'],
-
-            'type' =>
-                $first['type'],
+            'surah' => $first['from_surah'],
+            'ayah' => $first['from_ayah'],
+            'date' => $first['date'],
+            'type' => $first['type'],
         ];
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -655,78 +613,55 @@ class ReportsController extends Controller
         $additionRecords,
         $etqanRecords
     ) {
-
         $records = collect();
 
-
         /*
+        |--------------------------------------------------------------------------
         | Addition
+        |--------------------------------------------------------------------------
         */
 
         foreach ($additionRecords as $record) {
-
             $records->push([
+                'date' => $record->addition_date,
 
-                'date' =>
-                    $record->addition_date,
+                'from_surah' => $record->from_surah,
+                'from_ayah' => $record->from_ayah,
 
-                'from_surah' =>
-                    $record->from_surah,
+                'to_surah' => $record->to_surah,
+                'to_ayah' => $record->to_ayah,
 
-                'from_ayah' =>
-                    $record->from_ayah,
+                'type' => 'addition',
 
-                'to_surah' =>
-                    $record->to_surah,
-
-                'to_ayah' =>
-                    $record->to_ayah,
-
-                'type' =>
-                    'addition',
-
-                'id' =>
-                    $record->id,
+                'id' => $record->id,
             ]);
         }
 
-
         /*
+        |--------------------------------------------------------------------------
         | Etqan
+        |--------------------------------------------------------------------------
         */
 
         foreach ($etqanRecords as $record) {
-
             $records->push([
+                'date' => $record->addition_date,
 
-                'date' =>
-                    $record->addition_date,
+                'from_surah' => $record->from_surah,
+                'from_ayah' => $record->from_ayah,
 
-                'from_surah' =>
-                    $record->from_surah,
+                'to_surah' => $record->to_surah,
+                'to_ayah' => $record->to_ayah,
 
-                'from_ayah' =>
-                    $record->from_ayah,
+                'type' => 'etqan',
 
-                'to_surah' =>
-                    $record->to_surah,
-
-                'to_ayah' =>
-                    $record->to_ayah,
-
-                'type' =>
-                    'etqan',
-
-                'id' =>
-                    $record->id,
+                'id' => $record->id,
             ]);
         }
-
 
         if ($records->isEmpty()) {
             return null;
         }
-
 
         $last = $records
             ->sortBy([
@@ -735,23 +670,13 @@ class ReportsController extends Controller
             ])
             ->first();
 
-
         return [
-
-            'surah' =>
-                $last['to_surah'],
-
-            'ayah' =>
-                $last['to_ayah'],
-
-            'date' =>
-                $last['date'],
-
-            'type' =>
-                $last['type'],
+            'surah' => $last['to_surah'],
+            'ayah' => $last['to_ayah'],
+            'date' => $last['date'],
+            'type' => $last['type'],
         ];
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -763,55 +688,46 @@ class ReportsController extends Controller
         $additionRecords,
         $etqanRecords
     ) {
-
         $pages = 0;
 
-
         /*
+        |--------------------------------------------------------------------------
         | Addition
+        |--------------------------------------------------------------------------
         */
 
         foreach ($additionRecords as $record) {
-
             if (
                 (bool) (
-                    $record->general_revision
-                    ?? false
+                    $record->general_revision ?? false
                 )
             ) {
-
                 $pages += (float) (
-                    $record->num_of_pages
-                    ?? 0
+                    $record->num_of_pages ?? 0
                 );
             }
         }
 
-
         /*
+        |--------------------------------------------------------------------------
         | Etqan
+        |--------------------------------------------------------------------------
         */
 
         foreach ($etqanRecords as $record) {
-
             if (
                 (bool) (
-                    $record->general_revision
-                    ?? false
+                    $record->general_revision ?? false
                 )
             ) {
-
                 $pages += (float) (
-                    $record->num_of_sheets
-                    ?? 0
+                    $record->num_of_sheets ?? 0
                 );
             }
         }
 
-
         return $pages;
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -819,71 +735,80 @@ class ReportsController extends Controller
     |--------------------------------------------------------------------------
     */
 
-   private function getStudentAttendance($studentId, $fromDate, $toDate)
-{
-    if (!Schema::hasTable('attendances')) {
-        return [
-            'present_days' => 0,
-            'absent_days' => 0,
-        ];
-    }
-
-    $student = StudentModel::find($studentId);
-
-    if (!$student) {
-        return [
-            'present_days' => 0,
-            'absent_days' => 0,
-        ];
-    }
-
-    $records = DB::table('attendances')
-        ->where('user_id', $student->user_id)
-        ->whereBetween('insert_date', [
-            $fromDate,
-            $toDate
-        ])
-        ->get([
-            'insert_date',
-            'attendance_state'
-        ]);
-
-    $presentDates = [];
-    $absentDates = [];
-
-    foreach ($records as $record) {
-
-        $date = $record->insert_date;
-
-        switch ($record->attendance_state) {
-
-            case 'present':
-            case 'late':
-                $presentDates[$date] = true;
-                break;
-
-            case 'absent':
-                $absentDates[$date] = true;
-                break;
+    private function getStudentAttendance(
+        $studentId,
+        $fromDate,
+        $toDate
+    ) {
+        if (!Schema::hasTable('attendances')) {
+            return [
+                'present_days' => 0,
+                'absent_days' => 0,
+            ];
         }
+
+        $student = StudentModel::find($studentId);
+
+        if (!$student) {
+            return [
+                'present_days' => 0,
+                'absent_days' => 0,
+            ];
+        }
+
+        $records = DB::table('attendances')
+            ->where(
+                'user_id',
+                $student->user_id
+            )
+            ->whereBetween(
+                'insert_date',
+                [
+                    $fromDate,
+                    $toDate,
+                ]
+            )
+            ->get([
+                'insert_date',
+                'attendance_state',
+            ]);
+
+        $presentDates = [];
+        $absentDates = [];
+
+        foreach ($records as $record) {
+            $date = $record->insert_date;
+
+            switch ($record->attendance_state) {
+                case 'present':
+                case 'late':
+                    $presentDates[$date] = true;
+                    break;
+
+                case 'absent':
+                    $absentDates[$date] = true;
+                    break;
+            }
+        }
+
+        return [
+            'present_days' => count($presentDates),
+            'absent_days' => count($absentDates),
+        ];
     }
 
-    return [
-        'present_days' => count($presentDates),
-        'absent_days' => count($absentDates),
-    ];
-}
-  
+    /*
+    |--------------------------------------------------------------------------
+    | بناء تقرير المعلم
+    |--------------------------------------------------------------------------
+    */
 
     private function buildTeacherReport(
         $teacher,
         $fromDate,
         $toDate
     ) {
-
-        $teacherId =
-            $teacher->id;
-
+        $teacherId = $teacher->id;
 
         /*
         |--------------------------------------------------------------------------
@@ -891,13 +816,11 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $attendance =
-            $this->getTeacherAttendance(
-                $teacherId,
-                $fromDate,
-                $toDate
-            );
-
+        $attendance = $this->getTeacherAttendance(
+            $teacherId,
+            $fromDate,
+            $toDate
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -905,13 +828,11 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $examCount =
-            $this->getTeacherExamCount(
-                $teacherId,
-                $fromDate,
-                $toDate
-            );
-
+        $examCount = $this->getTeacherExamCount(
+            $teacherId,
+            $fromDate,
+            $toDate
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -920,46 +841,26 @@ class ReportsController extends Controller
         */
 
         return [
-
             'teacher' => [
-
-                'id' =>
-                    $teacherId,
-
-                'name' =>
-                    $teacher->teacher_name
-                    ?? null,
+                'id' => $teacherId,
+                'name' => $teacher->teacher_name ?? null,
             ],
-
 
             'period' => [
-
-                'from_date' =>
-                    $fromDate,
-
-                'to_date' =>
-                    $toDate,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
             ],
-
 
             'attendance' => [
-
-                'present_days' =>
-                    $attendance['present_days'],
-
-                'absent_days' =>
-                    $attendance['absent_days'],
+                'present_days' => $attendance['present_days'],
+                'absent_days' => $attendance['absent_days'],
             ],
 
-
             'exams' => [
-
-                'total_exams' =>
-                    $examCount,
+                'total_exams' => $examCount,
             ],
         ];
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -967,71 +868,84 @@ class ReportsController extends Controller
     |--------------------------------------------------------------------------
     */
 
-  private function getTeacherAttendance($teacherId, $fromDate, $toDate)
-{
-    if (!Schema::hasTable('attendances')) {
-        return [
-            'present_days' => 0,
-            'absent_days' => 0,
-        ];
-    }
-
-    $teacher = TeacherModel::find($teacherId);
-
-    if (!$teacher) {
-        return [
-            'present_days' => 0,
-            'absent_days' => 0,
-        ];
-    }
-
-    $records = DB::table('attendances')
-        ->where('user_id', $teacher->user_id)
-        ->where('role', 'teacher')
-        ->whereBetween('insert_date', [
-            $fromDate,
-            $toDate
-        ])
-        ->get([
-            'insert_date',
-            'attendance_state'
-        ]);
-
-    $presentDates = [];
-    $absentDates = [];
-
-    foreach ($records as $record) {
-
-        switch ($record->attendance_state) {
-
-            case 'present':
-            case 'late':
-                $presentDates[$record->insert_date] = true;
-                break;
-
-            case 'absent':
-                $absentDates[$record->insert_date] = true;
-                break;
+    private function getTeacherAttendance(
+        $teacherId,
+        $fromDate,
+        $toDate
+    ) {
+        if (!Schema::hasTable('attendances')) {
+            return [
+                'present_days' => 0,
+                'absent_days' => 0,
+            ];
         }
+
+        $teacher = TeacherModel::find($teacherId);
+
+        if (!$teacher) {
+            return [
+                'present_days' => 0,
+                'absent_days' => 0,
+            ];
+        }
+
+        $records = DB::table('attendances')
+            ->where(
+                'user_id',
+                $teacher->user_id
+            )
+            ->where(
+                'role',
+                'teacher'
+            )
+            ->whereBetween(
+                'insert_date',
+                [
+                    $fromDate,
+                    $toDate,
+                ]
+            )
+            ->get([
+                'insert_date',
+                'attendance_state',
+            ]);
+
+        $presentDates = [];
+        $absentDates = [];
+
+        foreach ($records as $record) {
+            switch ($record->attendance_state) {
+                case 'present':
+                case 'late':
+                    $presentDates[$record->insert_date] = true;
+                    break;
+
+                case 'absent':
+                    $absentDates[$record->insert_date] = true;
+                    break;
+            }
+        }
+
+        return [
+            'present_days' => count($presentDates),
+            'absent_days' => count($absentDates),
+        ];
     }
 
-    return [
-        'present_days' => count($presentDates),
-        'absent_days' => count($absentDates),
-    ];
-}
+    /*
+    |--------------------------------------------------------------------------
+    | عدد اختبارات المعلم
+    |--------------------------------------------------------------------------
+    */
 
     private function getTeacherExamCount(
         $teacherId,
         $fromDate,
         $toDate
     ) {
-
         if (!Schema::hasTable('record_exam')) {
-
             return 0;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1039,16 +953,12 @@ class ReportsController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            !Schema::hasColumn(
-                'record_exam',
-                'teacher_id'
-            )
-        ) {
-
+        if (!Schema::hasColumn(
+            'record_exam',
+            'teacher_id'
+        )) {
             return 0;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1066,7 +976,6 @@ class ReportsController extends Controller
             ]
         );
 
-
         /*
         |--------------------------------------------------------------------------
         | إذا لم يوجد تاريخ
@@ -1074,10 +983,8 @@ class ReportsController extends Controller
         */
 
         if (!$dateColumn) {
-
             return 0;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1103,7 +1010,6 @@ class ReportsController extends Controller
             ->count();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | البحث عن عمود موجود
@@ -1114,21 +1020,166 @@ class ReportsController extends Controller
         $table,
         array $columns
     ) {
-
         foreach ($columns as $column) {
-
-            if (
-                Schema::hasColumn(
-                    $table,
-                    $column
-                )
-            ) {
-
+            if (Schema::hasColumn(
+                $table,
+                $column
+            )) {
                 return $column;
             }
         }
 
-
         return null;
     }
+
+    /*
+|--------------------------------------------------------------------------
+| الإحصائيات العامة للاختبارات
+|--------------------------------------------------------------------------
+|
+| ترجع:
+| 1. نسبة نجاح الاختبارات الرسمية للسنة الحالية
+| 2. نسبة نجاح الاختبارات الرسمية للسنة السابقة
+| 3. عدد الاختبارات المباغتة في السنة الحالية
+|
+*/
+
+public function getGeneralExamStatistics()
+{
+    if (!Schema::hasTable('record_exams')) {
+        return [
+            'official_success_rate' => 0,
+            'previous_year_official_success_rate' => 0,
+            'surprise_exams_this_year' => 0,
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | السنوات
+    |--------------------------------------------------------------------------
+    */
+
+    $currentYear = now()->year;
+    $previousYear = $currentYear - 1;
+
+    /*
+    |--------------------------------------------------------------------------
+    | الاختبارات الرسمية للسنة الحالية
+    |--------------------------------------------------------------------------
+    */
+
+    $currentOfficialExams = DB::table('record_exams')
+        ->where('exam_type', 'اختبار رسمي')
+        ->whereYear('insert_date', $currentYear)
+        ->get([
+            'final_percentage',
+        ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | إجمالي الاختبارات الرسمية الحالية
+    |--------------------------------------------------------------------------
+    */
+
+    $currentOfficialTotal = $currentOfficialExams->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | الاختبارات الرسمية الناجحة الحالية
+    |--------------------------------------------------------------------------
+    */
+
+    $currentOfficialPassed = $currentOfficialExams
+        ->where('final_percentage', '>=', 50)
+        ->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | نسبة النجاح الحالية
+    |--------------------------------------------------------------------------
+    */
+
+    $currentOfficialSuccessRate = $currentOfficialTotal > 0
+        ? (
+            $currentOfficialPassed
+            / $currentOfficialTotal
+        ) * 100
+        : 0;
+
+    /*
+    |--------------------------------------------------------------------------
+    | الاختبارات الرسمية للسنة السابقة
+    |--------------------------------------------------------------------------
+    */
+
+    $previousOfficialExams = DB::table('record_exams')
+        ->where('exam_type', 'اختبار رسمي')
+        ->whereYear('insert_date', $previousYear)
+        ->get([
+            'final_percentage',
+        ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | إجمالي الاختبارات الرسمية السابقة
+    |--------------------------------------------------------------------------
+    */
+
+    $previousOfficialTotal = $previousOfficialExams->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | الاختبارات الرسمية الناجحة السابقة
+    |--------------------------------------------------------------------------
+    */
+
+    $previousOfficialPassed = $previousOfficialExams
+        ->where('final_percentage', '>=', 50)
+        ->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | نسبة النجاح السابقة
+    |--------------------------------------------------------------------------
+    */
+
+    $previousOfficialSuccessRate = $previousOfficialTotal > 0
+        ? (
+            $previousOfficialPassed
+            / $previousOfficialTotal
+        ) * 100
+        : 0;
+
+    /*
+    |--------------------------------------------------------------------------
+    | عدد الاختبارات المباغتة في السنة الحالية
+    |--------------------------------------------------------------------------
+    */
+
+    $surpriseExamsThisYear = DB::table('record_exams')
+        ->where('exam_type', 'اختبار مباغت')
+        ->whereYear('insert_date', $currentYear)
+        ->count();
+
+    /*
+    |--------------------------------------------------------------------------
+    | النتيجة النهائية
+    |--------------------------------------------------------------------------
+    */
+
+    return [
+        'official_success_rate' => round(
+            $currentOfficialSuccessRate,
+            2
+        ),
+
+        'previous_year_official_success_rate' => round(
+            $previousOfficialSuccessRate,
+            2
+        ),
+
+        'surprise_exams_this_year' => $surpriseExamsThisYear,
+    ];
+}
 }

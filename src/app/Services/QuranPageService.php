@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\QuranAyahPage;
 use InvalidArgumentException;
 
+
 class QuranPageService
 {
     /**
@@ -22,14 +23,21 @@ class QuranPageService
      *
      * الحساب شامل صفحة البداية وصفحة النهاية.
      *
-     * مثال:
-     * الصفحة 10 إلى الصفحة 10 = صفحة واحدة
-     * الصفحة 10 إلى الصفحة 15 = 6 صفحات
+     * في حالة memorization_state = "لم يحفظ":
+     * يتم السماح باستخدام:
+     *
+     * fromSurah = "لم يسمع"
+     * fromAyah  = 0
+     * toSurah   = "لم يسمع"
+     * toAyah    = 0
+     *
+     * وتكون النتيجة 0 صفحة.
      *
      * @param string|int $fromSurah
      * @param int        $fromAyah
      * @param string|int $toSurah
      * @param int        $toAyah
+     * @param string|null $memorizationState
      *
      * @return int
      */
@@ -37,8 +45,27 @@ class QuranPageService
         string|int $fromSurah,
         int $fromAyah,
         string|int $toSurah,
-        int $toAyah
+        int $toAyah,
+        ?string $memorizationState = null
     ): int {
+        // ---------------------------------------------------------
+        // الاستثناء الوحيد:
+        // إذا كانت حالة الحفظ "لم يحفظ"
+        // وكان From و To = لم يسمع / 0
+        //
+        // نقبلها مباشرة بدون التحقق من صفحات القرآن.
+        // ---------------------------------------------------------
+
+        if (
+            $memorizationState === 'لم يحفظ' &&
+            $fromSurah === 'لم يسمع' &&
+            $fromAyah === 0 &&
+            $toSurah === 'لم يسمع' &&
+            $toAyah === 0
+        ) {
+            return 0;
+        }
+
         // ---------------------------------------------------------
         // 1. تحويل أسماء السور إلى أرقام
         // ---------------------------------------------------------
@@ -151,6 +178,10 @@ class QuranPageService
      */
     public function calculateSheets(int $numberOfPages): int
     {
+        if ($numberOfPages === 0) {
+            return 0;
+        }
+
         if ($numberOfPages < 1) {
             throw new InvalidArgumentException(
                 'عدد الصفحات يجب أن يكون أكبر من صفر'
@@ -163,24 +194,35 @@ class QuranPageService
     /**
      * حساب الصفحات والأوراق معاً.
      *
-     * يرجع:
+     * في حالة memorization_state = "لم يحفظ"
+     * مع From و To = "لم يسمع / 0":
      *
      * [
-     *     'pages' => 10,
-     *     'sheets' => 5,
+     *     'pages' => 0,
+     *     'sheets' => 0,
      * ]
+     *
+     * @param string|int $fromSurah
+     * @param int        $fromAyah
+     * @param string|int $toSurah
+     * @param int        $toAyah
+     * @param string|null $memorizationState
+     *
+     * @return array
      */
     public function calculatePagesAndSheets(
         string|int $fromSurah,
         int $fromAyah,
         string|int $toSurah,
-        int $toAyah
+        int $toAyah,
+        ?string $memorizationState = null
     ): array {
         $pages = $this->calculatePages(
             $fromSurah,
             $fromAyah,
             $toSurah,
-            $toAyah
+            $toAyah,
+            $memorizationState
         );
 
         $sheets = $this->calculateSheets($pages);
@@ -217,12 +259,16 @@ class QuranPageService
      * التحقق من رقم الآية.
      *
      * أرقام الآيات تبدأ من 1.
+     *
+     * ملاحظة:
+     * القيمة 0 مسموحة فقط في حالة الاستثناء
+     * "لم يحفظ" مع "لم يسمع".
      */
     private function validateAyahNumber(
         int $ayahNumber,
         string $position
     ): void {
-        if ($ayahNumber < 1) {
+        if ($ayahNumber < 0) {
             throw new InvalidArgumentException(
                 "رقم آية {$position} يجب أن يكون أكبر من صفر"
             );
@@ -257,6 +303,7 @@ class QuranPageService
      * "2"
      * "البقرة"
      * " آل عمران "
+     * "لم يسمع"
      */
     private function getSurahNumber(string|int $surah): int
     {
@@ -410,6 +457,7 @@ class QuranPageService
             'الإخلاص' => 112,
             'الفلق' => 113,
             'الناس' => 114,
+            'لم يسمع' => 0,
         ];
 
         if (!isset($surahs[$surah])) {
@@ -421,4 +469,7 @@ class QuranPageService
         return $surahs[$surah];
     }
 }
+
+
+
 

@@ -1,4 +1,5 @@
 <?php
+use App\Http\Requests\Api\ReportRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
@@ -120,7 +121,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
            
            //reports controller 
            Route::post('/reports_students',[ReportsController::class, 'studentsReport']);
-           
+           Route::Post('/reports_teachers',[ReportsController::class, 'teachersReport']);
+           Route::get('/reporte_exams',[ReportsController::class, 'getGeneralExamStatistics']);
            //get_one_user
            Route::post('/get_one_user', [UserController::class, 'get_one_user']);
            
@@ -146,7 +148,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
           
            // Recored Exams Routes
      
-           
+        //prasentage of attendances
+        Route::post('/get_attendance_percentage', [AttendancesController::class, 'getAttendancePercentage']);
            //RecordSardDaysControllerv
             
 });
@@ -196,6 +199,9 @@ Route::middleware(['auth:sanctum', 'role:admin,student', 'student.scope'])->grou
 
 Route::middleware(['auth:sanctum', 'role:admin,teacher', 'teacher.scope'])->group(function () {
 
+
+             //prasentage of attendances
+        Route::post('/get_student_attendance_percentage', [AttendancesController::class, 'getStudentAttendancePercentage']);
      //student 
 
       // Addition Records Routes

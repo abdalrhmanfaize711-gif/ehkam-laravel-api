@@ -20,13 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
         |--------------------------------------------------------------------------
         */
 
-        // $middleware->append(
-        //     \App\Http\Middleware\ConvertHijriRequestMiddleware::class
-        // );
+        $middleware->append(
+            \App\Http\Middleware\ConvertHijriRequestMiddleware::class
+        );
 
-        // $middleware->append(
-        //     \App\Http\Middleware\ConvertHijriResponseMiddleware::class
-        // );
+        $middleware->append(
+            \App\Http\Middleware\ConvertHijriResponseMiddleware::class
+        );
 
         /*
         |--------------------------------------------------------------------------

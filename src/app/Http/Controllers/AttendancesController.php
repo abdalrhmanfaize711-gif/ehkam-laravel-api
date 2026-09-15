@@ -4,16 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Api\GetAllAttendancesRequest;
 use App\Http\Requests\Api\GetSpecialAttendancesRequest;
-use Illuminate\Http\Request;
-use App\Models\AttendancesModel;
-use App\Models\NotificationsModel;
-use App\Models\StudentModel;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Api\getAbsentStudentByDateRequest;
 use App\Http\Requests\Api\AddLateAttendanceRequest;
 use App\Http\Requests\Api\AddAttendancesRequest;
 use App\Http\Requests\Api\GetTodayAttendancePercentageRequest;
 use App\Http\Requests\Api\GetLastFourAttendanceDatesRequest;
+
+use App\Http\Requests\Api\IDStudent;
+use App\Models\AttendancesModel;
+use App\Models\NotificationsModel;
+use App\Models\StudentModel;
+use App\Models\TeacherModel;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 
 class AttendancesController extends Controller
@@ -23,36 +27,94 @@ class AttendancesController extends Controller
     // نسبة الحضور اليوم
     // ____________________________________________________________
 
-    public function getTodayAttendancePercentage()
-    {
-        // Total users (students + teachers)
-        $totalUsers = DB::table('users')->count();
+    public function getTodayAttendancePercentage() {
+        /*
+        |--------------------------------------------------------------------------
+        | إجمالي المستخدمين
+        |--------------------------------------------------------------------------
+        |
+        | نريد الطلاب + المعلمين فقط.
+        |
+        | لا ندخل admin في حساب نسبة الحضور.
+        |
+        */
 
-        // Present today (present + late)
+        $totalUsers = DB::table('users')
+            ->whereIn('role', ['student', 'teacher'])
+            ->count();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | الحاضرون اليوم
+        |--------------------------------------------------------------------------
+        |
+        | present + late يعتبران حضورًا.
+        |
+        */
+
         $presentUsers = AttendancesModel::whereDate(
                 'insert_date',
                 today()
             )
             ->whereIn(
+                'role',
+                ['student', 'teacher']
+            )
+            ->whereIn(
                 'attendance_state',
                 ['present', 'late']
             )
-            ->count();
+            ->distinct('user_id')
+            ->count('user_id');
 
-        // Attendance percentage
+
+        /*
+        |--------------------------------------------------------------------------
+        | نسبة الحضور
+        |--------------------------------------------------------------------------
+        */
+
         $attendancePercentage = $totalUsers > 0
             ? round(($presentUsers / $totalUsers) * 100)
             : 0;
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | الغائبون
+        |--------------------------------------------------------------------------
+        */
+
+        $absentUsers = max(
+            0,
+            $totalUsers - $presentUsers
+        );
+
+
         return response()->json([
+
             'success' => true,
-            'message' => 'تم استرجاع نسبة الحضور اليوم بنجاح.',
+
+            'message' =>
+                'تم استرجاع نسبة الحضور اليوم بنجاح.',
+
             'data' => [
-                'attendance_percentage' => $attendancePercentage,
-                'total_users' => $totalUsers,
-                'present_users' => $presentUsers,
-                'absent_users' => $totalUsers - $presentUsers,
+
+                'attendance_percentage' =>
+                    $attendancePercentage,
+
+                'total_users' =>
+                    $totalUsers,
+
+                'present_users' =>
+                    $presentUsers,
+
+                'absent_users' =>
+                    $absentUsers,
+
             ]
+
         ], 200);
     }
 
@@ -61,8 +123,8 @@ class AttendancesController extends Controller
     // آخر 4 تواريخ تم فيها تسجيل التحضير للطلاب
     // ____________________________________________________________
 
-    public function getLastFourAttendanceDates()
-    {
+    public function getLastFourAttendanceDates( ) {
+
         $dates = DB::table('attendances')
             ->where(
                 'role',
@@ -76,9 +138,14 @@ class AttendancesController extends Controller
             ->limit(4)
             ->pluck('date');
 
+
         return response()->json([
+
             'success' => true,
-            'dates' => $dates
+
+            'dates' =>
+                $dates
+
         ], 200);
     }
 
@@ -87,11 +154,26 @@ class AttendancesController extends Controller
     // جلب الطلاب الغائبين حسب التاريخ
     // ____________________________________________________________
 
-    public function getAbsentStudentByDate(getAbsentStudentByDateRequest $request)
-    {
+    public function getAbsentStudentByDate(
+        getAbsentStudentByDateRequest $request
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | استخدام insert_date
+        |--------------------------------------------------------------------------
+        |
+        | كان الكود القديم يتحقق من date
+        | ثم يستخدم insert_date.
+        |
+        | الآن نستخدم نفس الحقل في كل مكان.
+        |
+        */
+
         $request->validate([
-            'date' => 'required|date',
+            'insert_date' => 'required|date',
         ]);
+
 
         $students = DB::table('attendances')
             ->join(
@@ -130,11 +212,20 @@ class AttendancesController extends Controller
             )
             ->get();
 
+
         return response()->json([
+
             'success' => true,
-            'date' => $request->insert_date,
-            'count' => $students->count(),
-            'students' => $students
+
+            'date' =>
+                $request->insert_date,
+
+            'count' =>
+                $students->count(),
+
+            'students' =>
+                $students
+
         ], 200);
     }
 
@@ -142,55 +233,14 @@ class AttendancesController extends Controller
     // ____________________________________________________________
     // إضافة تأخر لطالب
     // ____________________________________________________________
-    //
-    // Flutter يرسل:
-    //
-    // {
-    //     "user_id": 14,
-    //     "attendance_state": "late"
-    // }
-    //
-    // المنطق:
-    //
-    // 1. نأخذ آخر تاريخ حضور للطالب.
-    //
-    // 2. نبحث عن سجل الطالب في ذلك التاريخ.
-    //
-    // 3. إذا كان absent:
-    //       UPDATE نفس الـ ROW
-    //       absent -> late
-    //
-    // 4. إذا لم يوجد سجل:
-    //       CREATE late جديد
-    //
-    // 5. إذا كان late أصلًا:
-    //       لا ننشئ Row جديد.
-    //
-    // ____________________________________________________________
 
-    public function addLateAttendance(AddLateAttendanceRequest $request)
-    {
+    public function addLateAttendance(
+        AddLateAttendanceRequest $request
+    ) {
+
         DB::beginTransaction();
 
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | التحقق من البيانات
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                !$request->has('user_id') ||
-                !$request->has('attendance_state')
-            ) {
-                DB::rollBack();
-
-                return response()->json([
-                    'message' => 'user_id و attendance_state مطلوبة'
-                ], 400);
-            }
-
 
             /*
             |--------------------------------------------------------------------------
@@ -198,9 +248,11 @@ class AttendancesController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $userId = $request->user_id;
+            $userId =
+                $request->user_id;
 
-            $attendanceState = $request->attendance_state;
+            $attendanceState =
+                $request->attendance_state;
 
 
             /*
@@ -214,7 +266,12 @@ class AttendancesController extends Controller
                 DB::rollBack();
 
                 return response()->json([
-                    'message' => 'attendance_state يجب أن تكون late'
+
+                    'success' => false,
+
+                    'message' =>
+                        'attendance_state يجب أن تكون late'
+
                 ], 400);
             }
 
@@ -230,32 +287,26 @@ class AttendancesController extends Controller
                 $userId
             )->first();
 
+
             if (!$student) {
 
                 DB::rollBack();
 
                 return response()->json([
-                    'message' => 'لا يوجد طالب مرتبط بهذا المستخدم'
+
+                    'success' => false,
+
+                    'message' =>
+                        'لا يوجد طالب مرتبط بهذا المستخدم'
+
                 ], 404);
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | الحصول على آخر تاريخ حضور للطالب
+            | الحصول على آخر سجل حضور للطالب
             |--------------------------------------------------------------------------
-            |
-            | مثال:
-            |
-            | id | user_id | role    | state  | insert_date
-            | ------------------------------------------------
-            | 25 | 14      | student | absent | 2026-08-11
-            | 28 | 14      | student | late   | 2026-08-09
-            |
-            | النتيجة:
-            |
-            | lastDate = 2026-08-11
-            |
             */
 
             $lastAttendance = AttendancesModel::where(
@@ -277,24 +328,13 @@ class AttendancesController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | تحديد آخر تاريخ
+            | تحديد التاريخ
             |--------------------------------------------------------------------------
             */
 
-            if ($lastAttendance) {
-
-                $lastDate = $lastAttendance->insert_date;
-
-            } else {
-
-                /*
-                |--------------------------------------------------------------------------
-                | لا يوجد أي سجل سابق
-                |--------------------------------------------------------------------------
-                */
-
-                $lastDate = now()->format('Y-m-d');
-            }
+            $lastDate = $lastAttendance
+                ? $lastAttendance->insert_date
+                : now()->format('Y-m-d');
 
 
             /*
@@ -315,9 +355,7 @@ class AttendancesController extends Controller
                     'insert_date',
                     $lastDate
                 )
-                ->orderByDesc(
-                    'id'
-                )
+                ->orderByDesc('id')
                 ->first();
 
 
@@ -331,33 +369,74 @@ class AttendancesController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | الحالة absent
+                | present -> late
                 |--------------------------------------------------------------------------
                 |
-                | IMPORTANT:
+                | هذا غير مسموح.
                 |
-                | لا نعمل CREATE.
+                | الكود القديم كان يرجع 200 برسالة:
+                | تم تحويل سجل الغياب...
                 |
-                | نعدل نفس الـ ROW.
+                | رغم أنه لم يغير أي شيء.
                 |
+                */
+
+                if (
+                    $existingAttendance->attendance_state === 'present'
+                ) {
+
+                    DB::rollBack();
+
+                    return response()->json([
+
+                        'success' => false,
+
+                        'message' =>
+                            'الطالب مسجل حاضرًا في آخر تاريخ، ولا يمكن تحويل الحضور إلى تأخر',
+
+                        'action' =>
+                            'already_present',
+
+                        'last_date' =>
+                            $lastDate,
+
+                        'attendance' =>
+                            $existingAttendance,
+
+                    ], 409);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
                 | absent -> late
-                |
+                |--------------------------------------------------------------------------
                 */
 
                 if (
                     $existingAttendance->attendance_state === 'absent'
                 ) {
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | تعديل نفس السجل
+                    |--------------------------------------------------------------------------
+                    */
+
                     $existingAttendance->update([
-                        'attendance_state' => 'late',
+
+                        'attendance_state' =>
+                            'late',
+
                     ]);
+
 
                     $existingAttendance->refresh();
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | حذف إشعار الغياب لنفس التاريخ
+                    | حذف إشعار الغياب
                     |--------------------------------------------------------------------------
                     */
 
@@ -378,7 +457,7 @@ class AttendancesController extends Controller
 
                     /*
                     |--------------------------------------------------------------------------
-                    | حساب عدد مرات التأخر
+                    | حساب مرات التأخر
                     |--------------------------------------------------------------------------
                     */
 
@@ -402,30 +481,31 @@ class AttendancesController extends Controller
 
                     /*
                     |--------------------------------------------------------------------------
-                    | إذا وصل إلى 3 مرات تأخر
+                    | 3 مرات تأخر
                     |--------------------------------------------------------------------------
                     */
 
                     if ($lateCount >= 3) {
 
-                        $notification = NotificationsModel::create([
+                        $notification =
+                            NotificationsModel::create([
 
-                            'student_id' =>
-                                $student->id,
+                                'student_id' =>
+                                    $student->id,
 
-                            'halaqa_id' =>
-                                $student->halaqa_id,
+                                'halaqa_id' =>
+                                    $student->halaqa_id,
 
-                            'title' =>
-                                'إشعار غياب بسبب التأخر',
+                                'title' =>
+                                    'إشعار غياب بسبب التأخر',
 
-                            'notification_time' =>
-                                now()->format('H:i:s'),
+                                'notification_time' =>
+                                    now()->format('H:i:s'),
 
-                            'insert_date' =>
-                                $lastDate,
+                                'insert_date' =>
+                                    $lastDate,
 
-                        ]);
+                            ]);
 
 
                         /*
@@ -455,6 +535,8 @@ class AttendancesController extends Controller
 
                     return response()->json([
 
+                        'success' => true,
+
                         'message' =>
                             'تم تحويل سجل الغياب إلى تأخر بنجاح',
 
@@ -479,7 +561,7 @@ class AttendancesController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | إذا كان late أصلًا
+                | late موجود أصلًا
                 |--------------------------------------------------------------------------
                 */
 
@@ -490,6 +572,8 @@ class AttendancesController extends Controller
                     DB::rollBack();
 
                     return response()->json([
+
+                        'success' => false,
 
                         'message' =>
                             'الطالب مسجل كمتأخر مسبقًا في آخر تاريخ',
@@ -517,6 +601,8 @@ class AttendancesController extends Controller
 
                 return response()->json([
 
+                    'success' => false,
+
                     'message' =>
                         'يوجد سجل حضور للطالب في آخر تاريخ بحالة أخرى',
 
@@ -535,33 +621,34 @@ class AttendancesController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | لا يوجد سجل في آخر تاريخ
+            | لا يوجد سجل سابق
             |--------------------------------------------------------------------------
             |
-            | هنا فقط نقوم بإنشاء late جديد.
+            | ننشئ late جديد.
             |
             */
 
-            $newAttendance = AttendancesModel::create([
+            $newAttendance =
+                AttendancesModel::create([
 
-                'user_id' =>
-                    $userId,
+                    'user_id' =>
+                        $userId,
 
-                'role' =>
-                    'student',
+                    'role' =>
+                        'student',
 
-                'attendance_state' =>
-                    'late',
+                    'attendance_state' =>
+                        'late',
 
-                'insert_date' =>
-                    $lastDate,
+                    'insert_date' =>
+                        $lastDate,
 
-            ]);
+                ]);
 
 
             /*
             |--------------------------------------------------------------------------
-            | حساب عدد مرات التأخر
+            | حساب مرات التأخر
             |--------------------------------------------------------------------------
             */
 
@@ -585,30 +672,31 @@ class AttendancesController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | إذا وصل إلى 3 مرات تأخر
+            | 3 مرات تأخر
             |--------------------------------------------------------------------------
             */
 
             if ($lateCount >= 3) {
 
-                $notification = NotificationsModel::create([
+                $notification =
+                    NotificationsModel::create([
 
-                    'student_id' =>
-                        $student->id,
+                        'student_id' =>
+                            $student->id,
 
-                    'halaqa_id' =>
-                        $student->halaqa_id,
+                        'halaqa_id' =>
+                            $student->halaqa_id,
 
-                    'title' =>
-                        'إشعار غياب بسبب التأخر',
+                        'title' =>
+                            'إشعار غياب بسبب التأخر',
 
-                    'notification_time' =>
-                        now()->format('H:i:s'),
+                        'notification_time' =>
+                            now()->format('H:i:s'),
 
-                    'insert_date' =>
-                        $lastDate,
+                        'insert_date' =>
+                            $lastDate,
 
-                ]);
+                    ]);
 
 
                 /*
@@ -633,22 +721,12 @@ class AttendancesController extends Controller
             }
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Commit
-            |--------------------------------------------------------------------------
-            */
-
             DB::commit();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Response
-            |--------------------------------------------------------------------------
-            */
-
             return response()->json([
+
+                'success' => true,
 
                 'message' =>
                     'تم إضافة سجل التأخر بنجاح',
@@ -671,11 +749,13 @@ class AttendancesController extends Controller
             ], 201);
 
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             DB::rollBack();
 
             return response()->json([
+
+                'success' => false,
 
                 'message' =>
                     'حدث خطأ أثناء إضافة سجل التأخر',
@@ -692,15 +772,17 @@ class AttendancesController extends Controller
     // إضافة التحضير
     // ____________________________________________________________
 
-    public function add_attendances(AddAttendancesRequest $request)
-    {
+    public function add_attendances(
+        AddAttendancesRequest $request
+    ) {
+
         DB::beginTransaction();
 
         try {
 
             /*
             |--------------------------------------------------------------------------
-            | التحقق من وجود بيانات التحضير
+            | التأكد من وجود البيانات
             |--------------------------------------------------------------------------
             */
 
@@ -712,7 +794,12 @@ class AttendancesController extends Controller
                 DB::rollBack();
 
                 return response()->json([
-                    'message' => 'لا توجد معلومات للحضور'
+
+                    'success' => false,
+
+                    'message' =>
+                        'لا توجد معلومات للحضور'
+
                 ], 400);
             }
 
@@ -731,6 +818,7 @@ class AttendancesController extends Controller
                     !isset($attendance['attendance_state']) ||
                     !isset($attendance['insert_date'])
                 ) {
+
                     throw new \Exception(
                         'user_id و role و attendance_state و insert_date مطلوبة'
                     );
@@ -740,12 +828,96 @@ class AttendancesController extends Controller
                 if (
                     !in_array(
                         $attendance['role'],
-                        ['student', 'teacher']
+                        ['student', 'teacher'],
+                        true
                     )
                 ) {
+
                     throw new \Exception(
                         'role يجب أن يكون student أو teacher'
                     );
+                }
+
+
+                if (
+                    !in_array(
+                        $attendance['attendance_state'],
+                        ['present', 'absent', 'late'],
+                        true
+                    )
+                ) {
+
+                    throw new \Exception(
+                        'attendance_state يجب أن تكون present أو absent أو late'
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | التأكد من وجود المستخدم
+                |--------------------------------------------------------------------------
+                */
+
+                $userExists = DB::table('users')
+                    ->where(
+                        'id',
+                        $attendance['user_id']
+                    )
+                    ->exists();
+
+
+                if (!$userExists) {
+
+                    throw new \Exception(
+                        "المستخدم رقم {$attendance['user_id']} غير موجود"
+                    );
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | التأكد من وجود الطالب/المعلم
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $attendance['role'] === 'student'
+                ) {
+
+                    $studentExists =
+                        StudentModel::where(
+                            'user_id',
+                            $attendance['user_id']
+                        )->exists();
+
+
+                    if (!$studentExists) {
+
+                        throw new \Exception(
+                            'لا يوجد طالب مرتبط بهذا المستخدم'
+                        );
+                    }
+                }
+
+
+                if (
+                    $attendance['role'] === 'teacher'
+                ) {
+
+                    $teacherExists =
+                        TeacherModel::where(
+                            'user_id',
+                            $attendance['user_id']
+                        )->exists();
+
+
+                    if (!$teacherExists) {
+
+                        throw new \Exception(
+                            'لا يوجد معلم مرتبط بهذا المستخدم'
+                        );
+                    }
                 }
             }
 
@@ -758,19 +930,20 @@ class AttendancesController extends Controller
 
             foreach ($request->attendances as $attendance) {
 
-                $existingAttendance = AttendancesModel::where(
-                        'user_id',
-                        $attendance['user_id']
-                    )
-                    ->where(
-                        'role',
-                        $attendance['role']
-                    )
-                    ->whereDate(
-                        'insert_date',
-                        $attendance['insert_date']
-                    )
-                    ->first();
+                $existingAttendance =
+                    AttendancesModel::where(
+                            'user_id',
+                            $attendance['user_id']
+                        )
+                        ->where(
+                            'role',
+                            $attendance['role']
+                        )
+                        ->whereDate(
+                            'insert_date',
+                            $attendance['insert_date']
+                        )
+                        ->first();
 
 
                 if ($existingAttendance) {
@@ -781,7 +954,7 @@ class AttendancesController extends Controller
                     |
                     | absent -> late
                     |
-                    | سيتم تعديل نفس الـ ROW لاحقًا.
+                    | يسمح به لأننا سنعدل نفس السجل.
                     |--------------------------------------------------------------------------
                     */
 
@@ -790,6 +963,7 @@ class AttendancesController extends Controller
                         $attendance['attendance_state'] === 'late' &&
                         $existingAttendance->attendance_state === 'absent'
                     ) {
+
                         continue;
                     }
 
@@ -809,9 +983,13 @@ class AttendancesController extends Controller
 
 
                     throw new \Exception(
+
                         $userName
+
                             ? "{$roleName} {$userName} تم تحضيره مسبقًا في تاريخ {$attendance['insert_date']}"
+
                             : "هذا {$roleName} تم تحضيره مسبقًا في تاريخ {$attendance['insert_date']}"
+
                     );
                 }
             }
@@ -842,7 +1020,13 @@ class AttendancesController extends Controller
                     . $date;
 
 
-                if (in_array($key, $checkedUsers)) {
+                if (
+                    in_array(
+                        $key,
+                        $checkedUsers,
+                        true
+                    )
+                ) {
 
                     $roleName =
                         $attendance['role'] === 'student'
@@ -851,7 +1035,9 @@ class AttendancesController extends Controller
 
 
                     throw new \Exception(
+
                         "تم إرسال {$roleName} أكثر من مرة في نفس التاريخ {$date}"
+
                     );
                 }
 
@@ -883,14 +1069,6 @@ class AttendancesController extends Controller
                 |--------------------------------------------------------------------------
                 | معالجة late للطالب
                 |--------------------------------------------------------------------------
-                |
-                | إذا كان هناك absent في نفس التاريخ:
-                |
-                | UPDATE فقط.
-                |
-                | لا CREATE.
-                |
-                |--------------------------------------------------------------------------
                 */
 
                 if (
@@ -898,20 +1076,21 @@ class AttendancesController extends Controller
                     $attendance['attendance_state'] === 'late'
                 ) {
 
-                    $existingAttendance = AttendancesModel::where(
-                            'user_id',
-                            $attendance['user_id']
-                        )
-                        ->where(
-                            'role',
-                            'student'
-                        )
-                        ->whereDate(
-                            'insert_date',
-                            $attendance['insert_date']
-                        )
-                        ->orderByDesc('id')
-                        ->first();
+                    $existingAttendance =
+                        AttendancesModel::where(
+                                'user_id',
+                                $attendance['user_id']
+                            )
+                            ->where(
+                                'role',
+                                'student'
+                            )
+                            ->whereDate(
+                                'insert_date',
+                                $attendance['insert_date']
+                            )
+                            ->orderByDesc('id')
+                            ->first();
 
 
                     /*
@@ -927,40 +1106,40 @@ class AttendancesController extends Controller
 
                         /*
                         |--------------------------------------------------------------------------
-                        | UPDATE نفس الـ ROW
+                        | تعديل نفس السجل
                         |--------------------------------------------------------------------------
                         */
 
                         $existingAttendance->update([
-                            'attendance_state' => 'late',
+
+                            'attendance_state' =>
+                                'late',
+
                         ]);
 
 
                         $existingAttendance->refresh();
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | إضافة السجل المعدل للنتيجة
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $attendances[] = $existingAttendance;
+                        $attendances[] =
+                            $existingAttendance;
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | الحصول على الطالب
+                        | الطالب
                         |--------------------------------------------------------------------------
                         */
 
-                        $student = StudentModel::where(
-                            'user_id',
-                            $attendance['user_id']
-                        )->first();
+                        $student =
+                            StudentModel::where(
+                                'user_id',
+                                $attendance['user_id']
+                            )->first();
 
 
                         if (!$student) {
+
                             throw new \Exception(
                                 'لا يوجد طالب مرتبط بهذا المستخدم'
                             );
@@ -994,24 +1173,25 @@ class AttendancesController extends Controller
                         |--------------------------------------------------------------------------
                         */
 
-                        $lateCount = AttendancesModel::where(
-                                'user_id',
-                                $attendance['user_id']
-                            )
-                            ->where(
-                                'role',
-                                'student'
-                            )
-                            ->where(
-                                'attendance_state',
-                                'late'
-                            )
-                            ->count();
+                        $lateCount =
+                            AttendancesModel::where(
+                                    'user_id',
+                                    $attendance['user_id']
+                                )
+                                ->where(
+                                    'role',
+                                    'student'
+                                )
+                                ->where(
+                                    'attendance_state',
+                                    'late'
+                                )
+                                ->count();
 
 
                         /*
                         |--------------------------------------------------------------------------
-                        | إذا وصل إلى 3 مرات
+                        | 3 مرات تأخر
                         |--------------------------------------------------------------------------
                         */
 
@@ -1038,7 +1218,8 @@ class AttendancesController extends Controller
                                 ]);
 
 
-                            $notifications[] = $notification;
+                            $notifications[] =
+                                $notification;
 
 
                             /*
@@ -1065,17 +1246,9 @@ class AttendancesController extends Controller
 
                         /*
                         |--------------------------------------------------------------------------
-                        | مهم جدًا جدًا
-                        |--------------------------------------------------------------------------
+                        | مهم:
                         |
-                        | هنا نخرج من الدورة.
-                        |
-                        | حتى لا يصل التنفيذ إلى:
-                        |
-                        | AttendancesModel::create()
-                        |
-                        | وبالتالي لن يتم إنشاء late جديد.
-                        |
+                        | لا نصل إلى create()
                         |--------------------------------------------------------------------------
                         */
 
@@ -1088,32 +1261,28 @@ class AttendancesController extends Controller
                 |--------------------------------------------------------------------------
                 | إنشاء سجل التحضير
                 |--------------------------------------------------------------------------
-                |
-                | يصل هنا فقط إذا لم يكن لدينا:
-                |
-                | absent -> late
-                |
-                |--------------------------------------------------------------------------
                 */
 
-                $attendanceRecord = AttendancesModel::create([
+                $attendanceRecord =
+                    AttendancesModel::create([
 
-                    'user_id' =>
-                        $attendance['user_id'],
+                        'user_id' =>
+                            $attendance['user_id'],
 
-                    'role' =>
-                        $attendance['role'],
+                        'role' =>
+                            $attendance['role'],
 
-                    'attendance_state' =>
-                        $attendance['attendance_state'],
+                        'attendance_state' =>
+                            $attendance['attendance_state'],
 
-                    'insert_date' =>
-                        $attendance['insert_date'],
+                        'insert_date' =>
+                            $attendance['insert_date'],
 
-                ]);
+                    ]);
 
 
-                $attendances[] = $attendanceRecord;
+                $attendances[] =
+                    $attendanceRecord;
 
 
                 /*
@@ -1127,13 +1296,15 @@ class AttendancesController extends Controller
                     $attendance['attendance_state'] === 'late'
                 ) {
 
-                    $student = StudentModel::where(
-                        'user_id',
-                        $attendance['user_id']
-                    )->first();
+                    $student =
+                        StudentModel::where(
+                            'user_id',
+                            $attendance['user_id']
+                        )->first();
 
 
                     if (!$student) {
+
                         throw new \Exception(
                             'لا يوجد طالب مرتبط بهذا المستخدم'
                         );
@@ -1142,28 +1313,29 @@ class AttendancesController extends Controller
 
                     /*
                     |--------------------------------------------------------------------------
-                    | حساب عدد مرات التأخر
+                    | حساب مرات التأخر
                     |--------------------------------------------------------------------------
                     */
 
-                    $lateCount = AttendancesModel::where(
-                            'user_id',
-                            $attendance['user_id']
-                        )
-                        ->where(
-                            'role',
-                            'student'
-                        )
-                        ->where(
-                            'attendance_state',
-                            'late'
-                        )
-                        ->count();
+                    $lateCount =
+                        AttendancesModel::where(
+                                'user_id',
+                                $attendance['user_id']
+                            )
+                            ->where(
+                                'role',
+                                'student'
+                            )
+                            ->where(
+                                'attendance_state',
+                                'late'
+                            )
+                            ->count();
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | إذا وصل إلى 3 مرات
+                    | 3 مرات تأخر
                     |--------------------------------------------------------------------------
                     */
 
@@ -1190,7 +1362,8 @@ class AttendancesController extends Controller
                             ]);
 
 
-                        $notifications[] = $notification;
+                        $notifications[] =
+                            $notification;
 
 
                         /*
@@ -1227,13 +1400,15 @@ class AttendancesController extends Controller
                     $attendance['attendance_state'] === 'absent'
                 ) {
 
-                    $student = StudentModel::where(
-                        'user_id',
-                        $attendance['user_id']
-                    )->first();
+                    $student =
+                        StudentModel::where(
+                            'user_id',
+                            $attendance['user_id']
+                        )->first();
 
 
                     if (!$student) {
+
                         throw new \Exception(
                             'لا يوجد طالب مرتبط بهذا المستخدم'
                         );
@@ -1285,7 +1460,8 @@ class AttendancesController extends Controller
                             ]);
 
 
-                        $notifications[] = $notification;
+                        $notifications[] =
+                            $notification;
                     }
                 }
             }
@@ -1308,6 +1484,8 @@ class AttendancesController extends Controller
 
             return response()->json([
 
+                'success' => true,
+
                 'message' =>
                     'تم إضافة التحضير بنجاح',
 
@@ -1320,14 +1498,14 @@ class AttendancesController extends Controller
             ], 201);
 
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             DB::rollBack();
 
 
             /*
             |--------------------------------------------------------------------------
-            | خطأ التكرار
+            | أخطاء التكرار
             |--------------------------------------------------------------------------
             */
 
@@ -1344,6 +1522,8 @@ class AttendancesController extends Controller
 
                 return response()->json([
 
+                    'success' => false,
+
                     'message' =>
                         $e->getMessage(),
 
@@ -1359,6 +1539,8 @@ class AttendancesController extends Controller
 
             return response()->json([
 
+                'success' => false,
+
                 'message' =>
                     'حدث خطأ أثناء إضافة التحضير',
 
@@ -1371,26 +1553,55 @@ class AttendancesController extends Controller
 
 
     // ____________________________________________________________
-    // جلب جميع سجلات التحضير
+    // جلب جميع سجلات التحضير للطلاب
     // ____________________________________________________________
 
-    public function get_all_attendances_STD(GetAllAttendancesRequest $request)
-    {
+    public function get_all_attendances_STD(
+        GetAllAttendancesRequest $request
+    ) {
 
-        $attendances = AttendancesModel::where('role','student')->get();
+        $attendances =
+            AttendancesModel::where(
+                'role',
+                'student'
+            )->get();
+
 
         return response()->json([
-            'message' => 'تم جلب البيانات بنجاح',
-            'attendances' => $attendances
+
+            'message' =>
+                'تم جلب البيانات بنجاح',
+
+            'attendances' =>
+                $attendances
+
         ], 200);
     }
-     public function get_all_attendances_TCH(GetAllAttendancesRequest $request)
-    {
-        $attendances = AttendancesModel::where('role','teacher')->get();
+
+
+    // ____________________________________________________________
+    // جلب جميع سجلات التحضير للمعلمين
+    // ____________________________________________________________
+
+    public function get_all_attendances_TCH(
+        GetAllAttendancesRequest $request
+    ) {
+
+        $attendances =
+            AttendancesModel::where(
+                'role',
+                'teacher'
+            )->get();
+
 
         return response()->json([
-            'message' => 'تم جلب البيانات بنجاح',
-            'attendances' => $attendances
+
+            'message' =>
+                'تم جلب البيانات بنجاح',
+
+            'attendances' =>
+                $attendances
+
         ], 200);
     }
 
@@ -1399,50 +1610,85 @@ class AttendancesController extends Controller
     // جلب إحصائيات تحضير مستخدم معين
     // ____________________________________________________________
 
-    public function get_special_attendances(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
+    public function get_special_attendances(
+        GetSpecialAttendancesRequest $request
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | user_id
+        |--------------------------------------------------------------------------
+        */
+
+        $userId =
+            $request->user_id;
 
 
-        $present = AttendancesModel::where(
-            'user_id',
-            $request->user_id
-        )
-        ->where(
-            'attendance_state',
-            'present'
-        )
-        ->count();
+        /*
+        |--------------------------------------------------------------------------
+        | الحضور
+        |--------------------------------------------------------------------------
+        */
+
+        $present =
+            AttendancesModel::where(
+                'user_id',
+                $userId
+            )
+            ->where(
+                'attendance_state',
+                'present'
+            )
+            ->count();
 
 
-        $absent = AttendancesModel::where(
-            'user_id',
-            $request->user_id
-        )
-        ->where(
-            'attendance_state',
-            'absent'
-        )
-        ->count();
+        /*
+        |--------------------------------------------------------------------------
+        | الغياب
+        |--------------------------------------------------------------------------
+        */
+
+        $absent =
+            AttendancesModel::where(
+                'user_id',
+                $userId
+            )
+            ->where(
+                'attendance_state',
+                'absent'
+            )
+            ->count();
 
 
-        $late = AttendancesModel::where(
-            'user_id',
-            $request->user_id
-        )
-        ->where(
-            'attendance_state',
-            'late'
-        )
-        ->count();
+        /*
+        |--------------------------------------------------------------------------
+        | التأخر
+        |--------------------------------------------------------------------------
+        */
+
+        $late =
+            AttendancesModel::where(
+                'user_id',
+                $userId
+            )
+            ->where(
+                'attendance_state',
+                'late'
+            )
+            ->count();
 
 
-        $total = AttendancesModel::where(
-            'user_id',
-            $request->user_id
-        )->count();
+        /*
+        |--------------------------------------------------------------------------
+        | الإجمالي
+        |--------------------------------------------------------------------------
+        */
+
+        $total =
+            AttendancesModel::where(
+                'user_id',
+                $userId
+            )->count();
 
 
         return response()->json([
@@ -1453,7 +1699,7 @@ class AttendancesController extends Controller
             'data' => [
 
                 'user_id' =>
-                    $request->user_id,
+                    $userId,
 
                 'total_days' =>
                     $total,
@@ -1477,29 +1723,49 @@ class AttendancesController extends Controller
     // جلب الطلاب الغائبين حسب التاريخ
     // ____________________________________________________________
 
-    public function getAbsentStudentsByDate(getAbsentStudentByDateRequest $request)
-    {
+    public function getAbsentStudentsByDate(
+        getAbsentStudentByDateRequest $request
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | التحقق من التاريخ
+        |--------------------------------------------------------------------------
+        */
+
         $request->validate([
-            'insert_date' => 'required|date',
+
+            'insert_date' =>
+                'required|date',
+
         ]);
 
 
-        $absentStudents = AttendancesModel::with([
-            'user.student.halaqa'
-        ])
-        ->whereDate(
-            'insert_date',
-            $request->insert_date
-        )
-        ->where(
-            'role',
-            'student'
-        )
-        ->where(
-            'attendance_state',
-            'absent'
-        )
-        ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | جلب سجلات الغياب
+        |--------------------------------------------------------------------------
+        */
+
+        $absentStudents =
+            AttendancesModel::with([
+
+                'user.student.halaqa'
+
+            ])
+            ->whereDate(
+                'insert_date',
+                $request->insert_date
+            )
+            ->where(
+                'role',
+                'student'
+            )
+            ->where(
+                'attendance_state',
+                'absent'
+            )
+            ->get();
 
 
         /*
@@ -1534,33 +1800,41 @@ class AttendancesController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $students = $absentStudents
-            ->unique('user_id')
-            ->map(function ($attendance) {
+        $students =
+            $absentStudents
+                ->unique('user_id')
+                ->map(function ($attendance) {
 
-                return [
+                    $user =
+                        $attendance->user;
 
-                    'attendance_id' =>
-                        $attendance->id,
+                    $student =
+                        $user?->student;
 
-                    'user_id' =>
-                        $attendance->user_id,
+                    $halaqa =
+                        $student?->halaqa;
 
-                    'student_name' =>
-                        $attendance->user->name ?? null,
 
-                    'halaqa_name' =>
-                        $attendance->user
-                            ->student
-                            ->halaqa
-                            ->halaqa_type ?? null,
+                    return [
 
-                    'insert_date' =>
-                        $attendance->insert_date,
+                        'attendance_id' =>
+                            $attendance->id,
 
-                ];
-            })
-            ->values();
+                        'user_id' =>
+                            $attendance->user_id,
+
+                        'student_name' =>
+                            $user?->name,
+
+                        'halaqa_name' =>
+                            $halaqa?->halaqa_type,
+
+                        'insert_date' =>
+                            $attendance->insert_date,
+
+                    ];
+                })
+                ->values();
 
 
         /*
@@ -1585,5 +1859,47 @@ class AttendancesController extends Controller
 
         ], 200);
     }
+
+   public function getStudentAttendancePercentage(IDStudent $request)
+{
+    $studentId = $request->student_id;
+
+    $student = StudentModel::findOrFail($studentId);
+
+    $userId = $student->user_id;
+
+    $query = AttendancesModel::where('user_id', $userId)
+        ->where('role', 'student');
+
+    $total = $query->count();
+
+    $present = (clone $query)
+        ->where('attendance_state', 'present')
+        ->count();
+
+    $late = (clone $query)
+        ->where('attendance_state', 'late')
+        ->count();
+
+    $absent = (clone $query)
+        ->where('attendance_state', 'absent')
+        ->count();
+
+    $attended = $present + $late;
+
+    $percentage = $total > 0
+        ? round(($attended / $total) * 100, 2)
+        : 0;
+
+    return response()->json([
+        'student_id' => $studentId,
+        'user_id' => $userId,
+        'attendance_percentage' => $percentage,
+        'total_days' => $total,
+        'present_days' => $present,
+        'late_days' => $late,
+        'absent_days' => $absent,
+    ]);
 }
 
+}

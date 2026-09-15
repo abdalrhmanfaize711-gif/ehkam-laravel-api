@@ -817,152 +817,73 @@ class StudentProfileController extends Controller
     | ATTENDANCE
     |--------------------------------------------------------------------------
     */
-
-    private function getAttendance($userId)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | لا يوجد user
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$userId) {
-
-            return [
-
-                'total' => 0,
-
-                'present' => 0,
-
-                'absent' => 0,
-
-                'late' => 0,
-
-                'attendance_percentage' => 0,
-
-                'records' => [],
-            ];
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | سجلات الحضور
-        |--------------------------------------------------------------------------
-        */
-
-        $records = AttendancesModel::where(
-            'user_id',
-            $userId
-        )
-        ->orderBy(
-            'insert_date',
-            'desc'
-        )
-        ->get();
-
-
-        $total = $records->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | حضور
-        |--------------------------------------------------------------------------
-        */
-
-        $present = $records->filter(function ($record) {
-
-            $state = trim(
-                (string) $record->attendance_state
-            );
-
-            return in_array($state, [
-                'حضور',
-                'حاضر',
-                'present',
-                'Present',
-            ]);
-
-        })->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | غياب
-        |--------------------------------------------------------------------------
-        */
-
-        $absent = $records->filter(function ($record) {
-
-            $state = trim(
-                (string) $record->attendance_state
-            );
-
-            return in_array($state, [
-                'غياب',
-                'غائب',
-                'absent',
-                'Absent',
-            ]);
-
-        })->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | تأخر
-        |--------------------------------------------------------------------------
-        */
-
-        $late = $records->filter(function ($record) {
-
-            $state = trim(
-                (string) $record->attendance_state
-            );
-
-            return in_array($state, [
-                'تأخر',
-                'متأخر',
-                'late',
-                'Late',
-            ]);
-
-        })->count();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | النسبة
-        |--------------------------------------------------------------------------
-        */
-
-        $attendancePercentage = $total > 0
-
-            ? round(
-                ($present / $total) * 100,
-                2
-            )
-
-            : 0;
-
-
+private function getAttendance($userId)
+{
+    if (!$userId) {
         return [
-
-            'total' => $total,
-
-            'present' => $present,
-
-            'absent' => $absent,
-
-            'late' => $late,
-
-            'attendance_percentage' => $attendancePercentage,
-
-            'records' => $records,
+            'total' => 0,
+            'present' => 0,
+            'absent' => 0,
+            'late' => 0,
+            'attendance_percentage' => 0,
+            'records' => [],
         ];
     }
 
+    $records = AttendancesModel::where('user_id', $userId)
+        ->where('role', 'student')
+        ->orderBy('insert_date', 'desc')
+        ->get();
+
+    $total = $records->count();
+
+    $present = $records->filter(function ($record) {
+        $state = trim((string) $record->attendance_state);
+
+        return in_array($state, [
+            'حضور',
+            'حاضر',
+            'present',
+            'Present',
+        ]);
+    })->count();
+
+    $absent = $records->filter(function ($record) {
+        $state = trim((string) $record->attendance_state);
+
+        return in_array($state, [
+            'غياب',
+            'غائب',
+            'absent',
+            'Absent',
+        ]);
+    })->count();
+
+    $late = $records->filter(function ($record) {
+        $state = trim((string) $record->attendance_state);
+
+        return in_array($state, [
+            'تأخر',
+            'متأخر',
+            'late',
+            'Late',
+        ]);
+    })->count();
+
+    // الحضور + التأخر = حضر
+    $attendancePercentage = $total > 0
+        ? round((($present + $late) / $total) * 100, 2)
+        : 0;
+
+    return [
+        'total' => $total,
+        'present' => $present,
+        'absent' => $absent,
+        'late' => $late,
+        'attendance_percentage' => $attendancePercentage,
+        'records' => $records,
+    ];
+}
 
     /*
     |--------------------------------------------------------------------------
